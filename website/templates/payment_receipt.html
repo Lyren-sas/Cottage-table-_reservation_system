@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Receipt</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            body {
+                print-color-adjust: exact;
+                -webkit-print-color-adjust: exact;
+            }
+            .no-print {
+                display: none;
+            }
+            .print-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                border: none;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen py-12 px-4 sm:px-6">
+    <div class="max-w-3xl mx-auto print-container">
+        <!-- Header with back button -->
+        <div class="flex justify-between items-center mb-6 no-print">
+            <a href="{{ url_for('my_reservation.my_reservations') }}" class="flex items-center text-blue-600 hover:text-blue-800">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to My Reservations
+            </a>
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                Print Receipt
+            </button>
+        </div>
+
+        <!-- Receipt Card -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Receipt Header -->
+            <div class="bg-blue-600 text-white p-6 text-center">
+                <h1 class="text-2xl font-bold">PAYMENT RECEIPT</h1>
+                <p class="text-lg">{{ payment['receipt_number'] }}</p>
+            </div>
+
+            <!-- Status Banner -->
+            <div class="{% if payment['payment_status'] == 'completed' %}bg-green-100 text-green-800{% elif payment['payment_status'] == 'pending' %}bg-yellow-100 text-yellow-800{% else %}bg-red-100 text-red-800{% endif %} px-6 py-3 text-center font-medium">
+                Payment Status: {{ payment['payment_status']|title }}
+            </div>
+
+            <!-- Receipt Body -->
+            <div class="p-6">
+                <!-- Company Info -->
+                <div class="text-center mb-6">
+                    <h2 class="text-xl font-bold">Cottage Reservation System</h2>
+                    <p class="text-gray-600">123 Beach Road, Seaside Town</p>
+                    <p class="text-gray-600">contact@cottages.example.com | +1 234 567 8900</p>
+                </div>
+
+                <!-- Divider -->
+                <hr class="my-6 border-gray-300">
+
+                <!-- Transaction Details -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <h3 class="text-gray-600 font-semibold text-sm mb-2">TRANSACTION DETAILS</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Transaction ID:</span>
+                                <span class="font-medium">{{ payment['transaction_id'] }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Date:</span>
+                                <span class="font-medium">{{ payment['payment_date'] }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Payment Method:</span>
+                                <span class="font-medium">{{ payment['payment_method']|title }}</span>
+                            </div>
+                            {% if payment_details and payment_details.reference_number %}
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Reference Number:</span>
+                                <span class="font-medium">{{ payment_details.reference_number }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-gray-600 font-semibold text-sm mb-2">RESERVATION DETAILS</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Reservation ID:</span>
+                                <span class="font-medium">{{ payment['reservation_id'] }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Date of Stay:</span>
+                                <span class="font-medium">{{ payment['date_stay'] }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">Time:</span>
+                                <span class="font-medium">{{ payment['start_time'] }} - {{ payment['end_time'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cottage Details -->
+                <div class="mb-6">
+                    <h3 class="text-gray-600 font-semibold text-sm mb-3">COTTAGE DETAILS</h3>
+                    <div class="bg-gray-50 rounded-lg p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-lg">{{ payment['cottage_name'] }}</span>
+                            <span>Cottage #{{ payment['cottage_no'] }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Summary -->
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <h3 class="text-gray-600 font-semibold text-sm mb-3">PAYMENT SUMMARY</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span>Cottage Rate</span>
+                            <span>₱{{ payment['price']|float }}</span>
+                        </div>
+                        <!-- You can add any additional fees or taxes here -->
+                        <div class="border-t border-gray-300 pt-2 mt-2 flex justify-between font-bold">
+                            <span>Total Amount</span>
+                            <span>₱{{ payment['amount']|float }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="bg-gray-50 p-6 text-center">
+                <p class="text-gray-600 text-sm mb-2">Thank you for your reservation!</p>
+                <p class="text-gray-500 text-xs">This is an official receipt of your payment.</p>
+                <p class="text-gray-500 text-xs">For inquiries, please contact our customer service.</p>
+            </div>
+        </div>
+
+        <!-- Legal Notice -->
+        <div class="mt-6 text-center text-gray-500 text-xs">
+            <p>This receipt was generated on {{ payment['payment_date'] }}</p>
+        </div>
+    </div>
+</body>
+</html>

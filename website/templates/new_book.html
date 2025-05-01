@@ -1,0 +1,283 @@
+<!-- website/templates/book_cottage.html -->
+{% extends "base.html" %}
+
+{% block title %}Book Cottage #{{ cottage.cottage_no }} - Balugan Cottage{% endblock %}
+
+{% block content %}
+<div class="py-8 bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4">
+        <!-- Back Button -->
+        <a href="{{ url_for('make-reservation.make_reservation', date=selected_date) }}" class="inline-flex items-center mb-6 text-blue-600 hover:text-blue-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+            </svg>
+            Back to Cottages
+        </a>
+       
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <!-- Cottage Header Section -->
+            <div class="flex flex-col md:flex-row">
+                {% if cottage.cottage_image %}
+                    <div class="w-full md:w-1/3 bg-gray-200">
+                        <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="Cottage #{{ cottage.cottage_no }}" class="w-full h-64 object-cover">
+                    </div>
+                {% else %}
+                    <div class="w-full md:w-1/3 bg-gray-200 flex items-center justify-center h-48">
+                        <span class="text-gray-500">No Image</span>
+                    </div>
+                {% endif %}
+                
+                <div class="p-6 w-full md:w-2/3">
+                    <div class="flex items-center mb-2">
+                        <h1 class="text-2xl font-bold text-gray-800">Cottage #{{ cottage.cottage_no }}</h1>
+                        <span class="ml-2 px-3 py-1 bg-{{ cottage.flag_color|lower }}-100 text-{{ cottage.flag_color|lower }}-700 rounded-full text-sm">{{ cottage.flag_color }} Flag</span>
+                    </div>
+                    
+                    {% if cottage.cottage_description %}
+                        <p class="text-gray-600 mb-4">{{ cottage.cottage_description }}</p>
+                    {% endif %}
+                    
+                    
+                </div>
+
+                
+            </div>
+            
+            <!-- Cottage Discoveries Carousel -->
+                <div class="p-6 border-t border-gray-200">
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Discover More About This Cottage</h2>
+
+                <div class="cottage-carousel relative">
+                    <div class="carousel-container overflow-hidden">
+                        <div class="carousel-track flex transition-transform duration-300" id="carouselTrack">
+                            {% if cottage_discoveries %}
+                                {% for discovery in cottage_discoveries %}
+                                    <div class="carousel-item flex-none w-full md:w-1/3 p-2">
+                                        <div class="bg-gray-50 rounded-lg p-4 h-full shadow-sm">
+                                            {% if discovery.image_filename %}
+                                                <img src="{{ url_for('static', filename='discovery_images/' + discovery.image_filename) }}" 
+                                                        alt="Cottage Discovery" class="w-full h-48 object-cover rounded-md mb-3">
+                                            {% endif %}
+                                            <p class="text-gray-600">{{ discovery.description }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="carousel-item flex-none w-full p-2">
+                                    <div class="bg-gray-50 rounded-lg p-4 h-full shadow-sm text-center">
+                                        <p class="text-gray-500">No discoveries available for this cottage yet.</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Carousel Controls -->
+                    <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow p-2 ml-2 hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow p-2 mr-2 hover:bg-gray-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+                </div>
+                    <div class="p-6 border-t border-gray-200" id="reviewsSection">
+                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Guest Reviews</h2>
+                        <div id="reviewsContainer" class="space-y-6">
+                        <p class="text-gray-500">Loading reviews…</p>
+                        </div>
+                    </div>
+               
+            <!-- Booking Form Initial Section - Only Date and Time Selection -->
+            <form method="POST" action="{{ url_for('make-reservation.process_reservation') }}" id="bookingForm" class="p-6 border-t border-gray-200"
+                  data-availability-url="{{ url_for('make-reservation.check_availability') }}"
+                  data-tables-url="{{ url_for('make-reservation.get_cottage_tables') }}"
+                  data-image-base-path="{{ url_for('static', filename='table_images/') }}">
+                
+                <input type="hidden" id="cottage_id" name="cottage_id" value="{{ cottage.id }}">
+                <input type="hidden" id="base_amount" name="base_amount" value="{{ cottage.amount }}">
+                <input type="hidden" id="table_id" name="table_id" required>
+                <input type="hidden" id="amount" name="amount" value="{{ cottage.amount }}">
+                
+                <h2 class="text-xl font-semibold mb-4 text-gray-800">Select Date and Time</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="date_stay" class="block text-gray-700 font-medium mb-2">Date of Stay</label>
+                        <input 
+                            type="date" 
+                            id="date_stay" 
+                            name="date_stay" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                            min="{{ today_date }}"
+                            value="{{ selected_date or today_date }}"
+                            onchange="checkDateAvailability();"
+                        />
+                        <div id="date_availability_message" class="mt-2 text-sm hidden"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="max_persons" class="block text-gray-700 font-medium mb-2">Capacity</label>
+                        <div class="flex items-center">
+                            <input 
+                                type="number" 
+                                id="max_persons" 
+                                name="max_persons" 
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                required
+                                min="1"
+                                max="{{ cottage.max_persons }}"
+                                value="1"
+                            />
+                            <span class="ml-2 text-sm text-gray-500"> {{ cottage.max_persons }}</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="start_time" class="block text-gray-700 font-medium mb-2">Start Time</label>
+                        <input 
+                            type="time" 
+                            id="start_time" 
+                            name="start_time" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                            value="08:00"
+                            onchange="updateEndTimeMin(); checkTimeAvailability();"
+                        />
+                    </div>
+                    
+                    <div>
+                        <label for="end_time" class="block text-gray-700 font-medium mb-2">End Time</label>
+                        <input 
+                            type="time" 
+                            id="end_time" 
+                            name="end_time" 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                            value="17:00"
+                            onchange="checkTimeAvailability()"
+                        />
+                        <div id="time_availability_message" class="mt-2 text-sm hidden"></div>
+                    </div>
+                </div>
+                
+                <!-- Table Selection Section -->
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Select Table</h3>
+                    <div id="tableContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Tables will be loaded dynamically -->
+                        <div class="text-center py-4 text-gray-500">
+                            Loading tables...
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Reservation Details -->
+<div id="reservationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-screen overflow-y-auto">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Complete Your Reservation</h2>
+                <button type="button" id="closeModal" class="text-gray-600 hover:text-gray-900">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-2 text-gray-800">Reservation Summary</h3>
+                <div class="bg-gray-50 p-4 rounded-md">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-gray-600">Cottage:</p>
+                            <p class="font-medium">Cottage #{{ cottage.cottage_no }}</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Table:</p>
+                            <p class="font-medium" id="selectedTableInfo">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Date:</p>
+                            <p class="font-medium" id="selectedDateInfo">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Time:</p>
+                            <p class="font-medium" id="selectedTimeInfo">-</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-600">Persons:</p>
+                            <p class="font-medium" id="selectedPersonsInfo">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional Amenities Section (in Modal) -->
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3 text-gray-800">Additional Amenities</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {% for amenity in amenities %}
+                        <div class="flex items-center space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                            <input 
+                                type="checkbox" 
+                                id="amenity_{{ amenity.id }}" 
+                                name="amenities" 
+                                value="{{ amenity.id }}"
+                                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                onchange="updateTotalAmount()"
+                                data-price="{{ amenity.ame_price }}"
+                            >
+                            <label for="amenity_{{ amenity.id }}" class="flex-grow cursor-pointer">
+                                <div class="font-medium text-gray-700">{{ amenity.category }}</div>
+                                <div class="text-sm text-gray-500">₱{{ amenity.ame_price }}</div>
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Total Amount -->
+            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-md mb-6">
+                <span class="text-lg font-semibold text-gray-800">Total Amount:</span>
+                <div>
+                    <span class="text-2xl font-bold text-green-600" id="totalAmount">₱{{ cottage.amount }}</span>
+                </div>
+            </div>
+            
+            <div class="flex justify-end">
+                <button 
+                    type="button" 
+                    id="cancelButton"
+                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition duration-300 mr-3"
+                >
+                    Cancel
+                </button>
+                <button 
+                    type="button" 
+                    id="confirmButton"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition duration-300"
+                >
+                    Confirm Reservation
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this script tag to inject the reviews URL -->
+<script>
+    window.REVIEWS_URL = "{{ url_for('make-reservation.cottage_reviews', cottage_id=cottage.id) }}";
+</script>
+
+{% endblock %}

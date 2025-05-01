@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Make Reservation - Balugan Cottage{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-b from-blue-50 to-green-50 min-h-screen py-12">
+    <div class="container mx-auto px-6 max-w-full">
+        <!-- Hero Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-3 text-gray-800">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-500">Available Cottages</span>
+            </h1>
+            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Find your perfect seaside retreat from our collection of beautiful cottages</p>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-6 rounded-lg shadow-md {% if category == 'error' %}bg-red-100 text-red-700 border-l-4 border-red-500{% else %}bg-green-100 text-green-700 border-l-4 border-green-500{% endif %} animate-fade-in max-w-6xl mx-auto">
+                        <div class="flex items-center">
+                            {% if category == 'error' %}
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                            {% else %}
+                                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                            {% endif %}
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Search Bar -->
+        <div class="relative z-10 mb-12 max-w-6xl mx-auto">
+            <div class="backdrop-blur-sm bg-white/80 rounded-2xl shadow-xl p-6 border border-gray-100">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="w-full">
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                            <input 
+                                type="text" 
+                                id="cottageSearch" 
+                                placeholder="Search by cottage number, owner name, or location..." 
+                                class="w-full pl-12 pr-5 py-4 border border-gray-200 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 transition-all"
+                            >
+                        </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-base text-gray-600 mr-3 whitespace-nowrap">Filter by</span>
+                        <select id="searchFilter" class="bg-white border border-gray-200 rounded-xl shadow-sm px-4 py-3 focus:ring-blue-500 focus:border-blue-500 appearance-none pr-10 relative">
+                            <option value="all" selected>All</option>
+                            <option value="cottage_no">Cottage Number</option>
+                            <option value="owner_name">Owner Name</option>
+                            <option value="cottage_location">Location</option>
+                        </select>
+                        <div class="pointer-events-none absolute right-8 md:right-20 flex items-center px-2 text-gray-700">
+                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div id="searchResults" class="mt-3 text-sm font-medium text-gray-600"></div>
+            </div>
+        </div>
+
+        <!-- Cottage Cards Grid - MODIFIED FOR BIGGER CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8 mb-12" id="cottagesGrid">
+            {% for cottage in cottages %}
+                <div class="group bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 h-full flex flex-col" 
+                     data-owner-name="{{ cottage.owner_name }}" 
+                     data-location="{{ cottage.cottage_location }}">
+                     
+                    {% if cottage.cottage_image %}
+                        <div class="w-full h-80 overflow-hidden">
+                            <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="{{ cottage.cottage_no }}" 
+                                class="w-full h-80 object-cover transition-transform duration-500 group-hover:scale-110">
+                        </div>
+                    {% else %}
+                        <div class="w-full h-80 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                                      d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                        </div>
+                    {% endif %}
+
+                    <div class="flex flex-col flex-grow p-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-2xl font-bold text-gray-800">Cottage #{{ cottage.cottage_no }}</h2>
+                            <span class="px-4 py-1.5 bg-{{ cottage.flag_color|lower }}-100 text-{{ cottage.flag_color|lower }}-700 rounded-full text-sm font-medium flex items-center">
+                                <span class="h-3 w-3 bg-{{ cottage.flag_color|lower }}-500 rounded-full mr-2"></span>
+                                {{ cottage.flag_color }}
+                            </span>
+                        </div>
+
+                        <div class="mb-5 space-y-3">
+                            <p class="text-gray-700 flex items-center text-base">
+                                <svg class="w-5 h-5 mr-3 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span class="font-medium">Owner:</span> 
+                                <span class="ml-2 truncate">{{ cottage.owner_name }}</span>
+                            </p>
+                            <p class="text-gray-700 flex items-center text-base">
+                                <svg class="w-5 h-5 mr-3 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span class="font-medium">Location:</span>
+                                <span class="ml-2 truncate">{{ cottage.cottage_location }}</span>
+                            </p>
+                        </div>
+
+                        {% if cottage.cottage_description %}
+                            <div class="mb-6 flex-grow">
+                                <p class="text-gray-600 leading-relaxed text-base">{{ cottage.cottage_description|truncate(120) }}</p>
+                            </div>
+                        {% endif %}
+
+                        <a 
+                            href="{{ url_for('make-reservation.book_cottage', cottage_id=cottage.id, date=selected_date) }}"
+                            class="w-full text-center bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-6 rounded-xl transition duration-300 font-semibold mt-auto block shadow-md hover:shadow-lg flex items-center justify-center text-base"
+                        >
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                            View Tables
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Search Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('cottageSearch');
+    const searchFilter = document.getElementById('searchFilter');
+    const cottagesGrid = document.getElementById('cottagesGrid');
+    const searchResults = document.getElementById('searchResults');
+    const cottageCards = Array.from(cottagesGrid.children);
+    const originalCards = [...cottageCards];
+
+    // Add nice fade-in animation to cards on page load
+    cottageCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+        
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 50 * (index % 3)); // Adjusted stagger effect for fewer columns
+    });
+
+    // Adjust card heights for uniformity
+    function equalizeCardHeights() {
+        const visibleCards = document.querySelectorAll('#cottagesGrid > div');
+        if (visibleCards.length === 0) return;
+        
+        // Reset heights first
+        visibleCards.forEach(card => {
+            card.style.height = 'auto';
+        });
+        
+        // Calculate row groups based on viewport
+        const cardWidth = visibleCards[0].offsetWidth;
+        const gridWidth = cottagesGrid.offsetWidth;
+        const cardsPerRow = Math.floor(gridWidth / cardWidth);
+        
+        if (cardsPerRow > 1) {
+            // Group cards by row
+            for (let i = 0; i < visibleCards.length; i += cardsPerRow) {
+                const rowCards = Array.from(visibleCards).slice(i, i + cardsPerRow);
+                if (rowCards.length === 0) continue;
+                
+                // Find tallest card in row
+                const tallestHeight = Math.max(...rowCards.map(card => card.scrollHeight));
+                
+                // Set all cards in row to tallest height
+                rowCards.forEach(card => {
+                    card.style.height = `${tallestHeight}px`;
+                });
+            }
+        }
+    }
+
+    // Call on load and resize
+    window.addEventListener('load', equalizeCardHeights);
+    window.addEventListener('resize', equalizeCardHeights);
+
+    function performSearch() {
+        const query = searchInput.value.toLowerCase().trim();
+        const filter = searchFilter.value;
+
+        if (query === '') {
+            cottagesGrid.innerHTML = '';
+            originalCards.forEach(card => cottagesGrid.appendChild(card));
+            searchResults.textContent = '';
+            setTimeout(equalizeCardHeights, 100);
+            return;
+        }
+
+        const filteredCards = originalCards.filter(card => {
+            const cottageNo = card.querySelector('h2').textContent.toLowerCase();
+            const ownerName = card.getAttribute('data-owner-name').toLowerCase();
+            const location = card.getAttribute('data-location').toLowerCase();
+
+            if (filter === 'all') {
+                return cottageNo.includes(query) || ownerName.includes(query) || location.includes(query);
+            } else if (filter === 'cottage_no') {
+                return cottageNo.includes(query);
+            } else if (filter === 'owner_name') {
+                return ownerName.includes(query);
+            } else if (filter === 'cottage_location') {
+                return location.includes(query);
+            }
+
+            return false;
+        });
+
+        cottagesGrid.innerHTML = '';
+
+        if (filteredCards.length > 0) {
+            filteredCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                cottagesGrid.appendChild(card);
+                
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 30 * index);
+            });
+            
+            searchResults.textContent = `Found ${filteredCards.length} cottage(s) matching your search.`;
+            searchResults.classList.add('text-blue-600');
+            setTimeout(equalizeCardHeights, 100);
+        } else {
+            searchResults.textContent = '';
+            searchResults.classList.remove('text-blue-600');
+
+            const noResultsDiv = document.createElement('div');
+            noResultsDiv.className = 'col-span-1 md:col-span-2 lg:col-span-2 xl:col-span-3 p-8 text-center bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100';
+            noResultsDiv.style.opacity = '0';
+            noResultsDiv.style.transform = 'translateY(20px)';
+            noResultsDiv.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            
+            noResultsDiv.innerHTML = `
+                <svg class="w-24 h-24 mx-auto mb-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <p class="text-gray-700 font-bold text-2xl mb-3">No cottages found</p>
+                <p class="text-gray-600 text-lg mb-8">Try different search terms or clear the search to see all cottages</p>
+                <button id="clearSearch" class="px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition duration-300 font-medium shadow-md flex items-center mx-auto">
+                    <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                    Clear Search
+                </button>
+            `;
+            
+            cottagesGrid.appendChild(noResultsDiv);
+            
+            setTimeout(() => {
+                noResultsDiv.style.opacity = '1';
+                noResultsDiv.style.transform = 'translateY(0)';
+            }, 100);
+
+            document.getElementById('clearSearch').addEventListener('click', function() {
+                searchInput.value = '';
+                performSearch();
+            });
+        }
+    }
+
+    searchInput.addEventListener('input', performSearch);
+    searchFilter.addEventListener('change', performSearch);
+});
+</script>
+{% endblock %}

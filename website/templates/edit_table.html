@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Table - Cottage {{ cottage.cottage_no }} - Balugan Cottage{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+    <div class="flex items-center mb-6">
+        <a href="{{ url_for('cottages.cottage_tables', cottage_id=cottage.id) }}" class="text-blue-600 hover:text-blue-800 mr-2">
+            <i class="fas fa-arrow-left"></i> Back to Tables
+        </a>
+        <h1 class="text-2xl font-bold text-gray-800 ml-2">Edit Table for Cottage {{ cottage.cottage_no }}</h1>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="mb-4 p-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="bg-white shadow-md rounded-lg border-2 border-gray-200 p-6">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label for="table_no" class="block text-gray-700 text-sm font-bold mb-2">Table Number/Name*</label>
+                <input type="text" name="table_no" id="table_no" required value="{{ table.table_no }}" 
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-4">
+                <label for="capacity" class="block text-gray-700 text-sm font-bold mb-2">Capacity (number of persons)*</label>
+                <input type="number" name="capacity" id="capacity" required min="1" value="{{ table.capacity }}" 
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+
+            <div class="mb-6">
+                <label for="price" class="block text-gray-700 text-sm font-bold mb-2">Price*</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-700">₱</span>
+                    <input type="number" name="price" id="price" required min="0" step="0.01" value="{{ table.price }}" 
+                           class="shadow appearance-none border rounded w-full py-2 pl-8 pr-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end pt-4 border-t">
+                <a href="{{ url_for('cottages.cottage_tables', cottage_id=cottage.id) }}" 
+                   class="bg-gray-400 hover:bg-black text-white px-4 py-2 rounded-md transition duration-300 mr-4">Cancel</a>
+                <button type="submit" class="bg-blue-600 hover:bg-black text-white px-6 py-2 rounded-md transition duration-300">Update Table</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

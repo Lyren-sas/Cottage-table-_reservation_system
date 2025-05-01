@@ -1,0 +1,775 @@
+{% extends "base.html" %}
+
+{% block title %}My Reservations - Balugan Cottage{% endblock %}
+
+{% block content %}
+<div class="bg-gradient-to-b from-blue-50 to-green-50 min-h-screen py-12">
+    <div class="max-w-8xl mx-auto px-4">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold mb-3 text-gray-800">
+                <span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-green-500">My Reservations</span>
+            </h1>
+            
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% if not current_reservations and not approved_reservations and not past_reservations %}
+            <div class="text-center py-10">
+                <div class="mb-4 text-gray-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-semibold text-gray-700 mb-2">No Reservations Yet</h3>
+                <p class="text-gray-500 mb-6">You haven't made any cottage reservations yet.</p>
+                <a href="{{ url_for('make-reservation.make_reservation') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition duration-300">
+                    Book a Cottage
+                </a>
+            </div>
+        {% else %}
+            <!-- Reservation Status Tabs -->
+            <div class="mb-8 bg-white rounded-lg shadow">
+                <div class="flex items-center overflow-x-auto">
+                    <button id="tab-reserve" class="reservation-tab px-6 py-3 text-lg font-medium focus:outline-none border-b-2 border-blue-500 text-blue-600 flex-1 text-center active">
+                        Reserved
+                        {% if current_reservations %}
+                            <span class="ml-2 bg-yellow-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">{{ current_reservations|length }}</span>
+                        {% endif %}
+                    </button>
+                    <button id="tab-pending" class="reservation-tab active px-6 py-3 text-lg font-medium focus:outline-none border-b-2 border-blue-500 text-blue-600 flex-1 text-center">
+                        Pending
+                        {% if current_reservations %}
+                            <span class="ml-2 bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full text-xs">{{ current_reservations|length }}</span>
+                        {% endif %}
+                    </button>
+                    <button id="tab-approved" class="reservation-tab px-6 py-3 text-lg font-medium focus:outline-none border-b-2 border-transparent hover:border-gray-300 text-gray-600 hover:text-gray-800 flex-1 text-center">
+                        Approved
+                        {% if approved_reservations %}
+                            <span class="ml-2 bg-green-100 text-green-600 px-2 py-0.5 rounded-full text-xs">{{ approved_reservations|length }}</span>
+                        {% endif %}
+                    </button>
+                    <button id="tab-completed" class="reservation-tab px-6 py-3 text-lg font-medium focus:outline-none border-b-2 border-transparent hover:border-gray-300 text-gray-600 hover:text-gray-800 flex-1 text-center">
+                        Completed
+                        {% set completed_count = [0] %}
+                        {% for res in past_reservations %}
+                            {% if res.cottage_status == 'completed' or res.cottage_status == 'done' %}
+                                {% set _ = completed_count.append(completed_count.pop() + 1) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if completed_count[0] > 0 %}
+                            <span class="ml-2 bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full text-xs">{{ completed_count[0] }}</span>
+                        {% endif %}
+                    </button>
+                    <button id="tab-canceled" class="reservation-tab px-6 py-3 text-lg font-medium focus:outline-none border-b-2 border-transparent hover:border-gray-300 text-gray-600 hover:text-gray-800 flex-1 text-center">
+                        Canceled
+                        {% set canceled_count = [0] %}
+                        {% for res in past_reservations %}
+                            {% if res.cottage_status == 'canceled' or res.cottage_status == 'declined' %}
+                                {% set _ = canceled_count.append(canceled_count.pop() + 1) %}
+                            {% endif %}
+                        {% endfor %}
+                        {% if canceled_count[0] > 0 %}
+                            <span class="ml-2 bg-red-100 text-red-600 px-2 py-0.5 rounded-full text-xs">{{ canceled_count[0] }}</span>
+                        {% endif %}
+                    </button>
+                </div>
+            </div>
+            <div id="section-reserve" class="reservation-section">
+                {% if reserved_reservations %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {% for reservation in reserved_reservations %}
+                        <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 flex flex-col h-full">
+                            
+                            <!-- Image Section -->
+                            <div class="h-48 overflow-hidden rounded-t-2xl">
+                                {% if reservation.cottage_image %}
+                                    <img src="{{ url_for('static', filename='cottage_images/' + reservation.cottage_image) }}" alt="Cottage {{ reservation.cottage_no }}" class="w-full h-full object-cover">
+                                {% else %}
+                                    <div class="flex items-center justify-center w-full h-full bg-gray-100">
+                                        <span class="text-gray-400">No Image</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                
+                            <!-- Content Section -->
+                            <div class="flex-1 flex flex-col justify-between p-4">
+                                <div>
+                                    <h2 class="text-lg font-semibold text-gray-800 mb-1">Cottage #{{ reservation.cottage_no }}</h2>
+                                    <span class="inline-block px-2 py-1 mb-2 bg-{{ reservation.flag_color|lower }}-100 text-{{ reservation.flag_color|lower }}-700 text-xs rounded-full">{{ reservation.flag_color }} Flag</span>
+                                    
+                                    <p class="text-gray-600 text-sm"><strong>Owner:</strong> {{ reservation.owner_name }}</p>
+                                    <p class="text-gray-600 text-sm"><strong>Start:</strong> {{ reservation.start_date.strftime('%Y-%m-%d') }}</p>
+                                    <p class="text-gray-600 text-sm"><strong>End:</strong> {{ reservation.end_date.strftime('%Y-%m-%d') }}</p>
+                                    <p class="text-gray-600 text-sm"><strong>Amount:</strong> ₱{{ reservation.amount }}</p>
+                                    <p class="text-gray-600 text-sm"><strong>Status:</strong> 
+                                        <span class="{% if reservation.cottage_status == 'paid_online' %}text-green-600{% else %}text-blue-600{% endif %}">
+                                            {{ reservation.cottage_status|replace('_', ' ')|title }}
+                                        </span>
+                                    </p>
+                                </div>
+                
+                                <form action="{{ url_for('my_reservation.cancel_reservation', reservation_id=reservation.id) }}" method="POST" class="mt-4">
+                                    <button type="submit" class="w-full bg-red-500 text-white py-2 rounded-md hover:bg-red-600 transition">
+                                        Cancel Reservation
+                                    </button>
+                                </form>
+                            </div>
+                
+                        </div>
+                    {% endfor %}
+                </div>
+                
+                {% else %}
+                    <div class="text-center py-10 bg-white rounded-2xl shadow-md">
+                        <div class="mb-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Reserved Reservations</h3>
+                        <p class="text-gray-500">You don't have any reserved cottage reservations at the moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <!-- Pending Reservations Section -->
+            <div id="section-pending" class="reservation-section">
+                {% if current_reservations %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {% for reservation in current_reservations %}
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-yellow-500 flex flex-col h-full">
+                                
+                                
+                                <div class="flex flex-col md:flex-row flex-1">
+                                    <!-- Cottage Image -->
+                                    <div class="w-full md:w-2/5 h-48 md:h-auto bg-gray-200">
+                                        {% if reservation.cottage_image %}
+                                            <img src="{{ url_for('static', filename='cottage_images/' + reservation.cottage_image) }}" alt="Cottage {{ reservation.cottage_no }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <span class="text-gray-500">No Image</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Reservation Details -->
+                                    <div class="w-full md:w-3/5 p-4 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex items-center mb-3">
+                                                <h2 class="text-xl font-bold text-gray-800">Cottage #{{ reservation.cottage_no }}</h2>
+                                                <span class="ml-2 px-3 py-1 bg-{{ reservation.flag_color|lower }}-100 text-{{ reservation.flag_color|lower }}-700 rounded-full text-sm">{{ reservation.flag_color }} Flag</span>
+                                            </div>
+                                            
+                                            <!-- Owner Box -->
+                                            <div class="bg-blue-50 border border-blue-100 rounded-md p-2 mb-3 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                                <p class="text-blue-800 font-medium">{{ reservation.owner_name }}</p>
+                                            </div>
+                                            
+                                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 mb-4">
+                                                <p class="text-gray-700"><span class="font-medium">Date:</span> {{ reservation.date_stay }}</p>
+                                                <p class="text-gray-700"><span class="font-medium">Time:</span> {{ reservation.start_time }} - {{ reservation.end_time }}</p>
+                                                <p class="text-gray-700"><span class="font-medium">Persons:</span> {{ reservation.max_persons }}</p>
+                                                {% if reservation.table_no %}
+                                                <p class="text-gray-700"><span class="font-medium">Table:</span> #{{ reservation.table_no }}</p>
+                                                {% endif %}
+                                                <p class="text-gray-700 col-span-2"><span class="font-medium">Amount:</span> <span class="font-bold">₱{{ reservation.amount }}</span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        {% if reservation.can_cancel %}
+                                            <div class="mt-auto">
+                                                <button 
+                                                    onclick="openCancelModal('{{ reservation.id }}')" 
+                                                    class="w-full bg-white border border-red-300 text-red-600 hover:bg-red-50 transition-colors duration-300 font-medium px-4 py-2 rounded-md flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                    Cancel Reservation
+                                                </button>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <!-- Amenities Section if any -->
+                                {% if reservation.amenity_details %}
+                                    <div class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Amenities:</h3>
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for amenity in reservation.amenity_details %}
+                                                <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                                    {{ amenity.category }} (₱{{ amenity.price }})
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10 bg-white rounded-lg shadow-sm">
+                        <div class="mb-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Pending Reservations</h3>
+                        <p class="text-gray-500">You don't have any pending cottage reservations at the moment.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Approved Reservations Section -->
+            <div id="section-approved" class="reservation-section hidden">
+                {% if approved_reservations %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {% for reservation in approved_reservations %}
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-green-500 flex flex-col h-full relative">
+                                <div class="absolute top-2 right-2 px-1 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium shadow-sm">
+                                    Payment Required
+                                </div>
+                                
+                                <div class="flex flex-col md:flex-row flex-1">
+                                    <!-- Cottage Image -->
+                                    <div class="w-full md:w-2/5 h-48 md:h-auto bg-gray-200">
+                                        {% if reservation.cottage_image %}
+                                            <img src="{{ url_for('static', filename='cottage_images/' + reservation.cottage_image) }}" alt="Cottage {{ reservation.cottage_no }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <span class="text-gray-500">No Image</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Reservation Details -->
+                                    <div class="w-full md:w-3/5 p-4 flex flex-col justify-between">
+                                        <div>
+                                            <div class="flex items-center mb-3">
+                                                <h2 class="text-xl font-bold text-gray-800">Cottage #{{ reservation.cottage_no }}</h2>
+                                                <span class="ml-2 px-3 py-1 bg-{{ reservation.flag_color|lower }}-100 text-{{ reservation.flag_color|lower }}-700 rounded-full text-sm">{{ reservation.flag_color }} Flag</span>
+                                            </div>
+                                            
+                                            <!-- Owner Box -->
+                                            <div class="bg-blue-50 border border-blue-100 rounded-md p-2 mb-3 flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                </svg>
+                                                <p class="text-blue-800 font-medium">{{ reservation.owner_name }}</p>
+                                            </div>
+                                            
+                                            <div class="grid grid-cols-2 gap-x-2 gap-y-1 mb-4">
+                                                <p class="text-gray-700"><span class="font-medium">Date:</span> {{ reservation.date_stay }}</p>
+                                                <p class="text-gray-700"><span class="font-medium">Time:</span> {{ reservation.start_time }} - {{ reservation.end_time }}</p>
+                                                <p class="text-gray-700"><span class="font-medium">Persons:</span> {{ reservation.max_persons }}</p>
+                                                {% if reservation.table_no %}
+                                                <p class="text-gray-700"><span class="font-medium">Table:</span> #{{ reservation.table_no }}</p>
+                                                {% endif %}
+                                                <p class="text-gray-700 col-span-2"><span class="font-medium">Amount:</span> <span class="font-bold text-green-600">₱{{ reservation.amount }}</span></p>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Action Buttons -->
+                                        <div class="mt-auto space-y-2">
+                                            <button onclick="openPaymentModal('{{ reservation.id }}')" 
+                                                class="block w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 text-center">
+                                                <div class="flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                                    </svg>
+                                                    Choose Payment Method
+                                                    </div>
+                                                </button>
+                                            
+                                            {% if reservation.can_cancel %}
+                                                <button 
+                                                    onclick="openCancelModal('{{ reservation.id }}')" 
+                                                    class="w-full bg-white border border-red-300 text-red-600 hover:bg-red-50 transition-colors duration-300 font-medium py-2 rounded-md flex items-center justify-center">
+                                                    Cancel Reservation
+                                                </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Amenities Section if any -->
+                                {% if reservation.amenity_details %}
+                                    <div class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+                                        <h3 class="text-sm font-semibold text-gray-700 mb-2">Amenities:</h3>
+                                        <div class="flex flex-wrap gap-2">
+                                            {% for amenity in reservation.amenity_details %}
+                                                <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                                                    {{ amenity.category }} (₱{{ amenity.price }})
+                                                </span>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <!-- Timer Indicator -->
+                                <div class="bg-yellow-50 px-4 py-2 border-t border-yellow-200">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex items-center text-yellow-800">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <span class="text-sm font-medium">Payment due within 24 hours</span>
+                                        </div>
+                                        <div class="text-xs text-yellow-700">
+                                            Approved: {{ reservation.date_approved }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10 bg-white rounded-lg shadow-sm">
+                        <div class="mb-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Approved Reservations</h3>
+                        <p class="text-gray-500">You don't have any approved reservations awaiting payment.</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div id="section-completed" class="reservation-section">
+                {% set completed_reservations = [] %}
+                {% for res in past_reservations %}
+                    {% if res.cottage_status == 'completed' or res.cottage_status == 'done' %}
+                        {% set _ = completed_reservations.append(res) %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if completed_reservations %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        {% for reservation in completed_reservations %}
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 border-blue-500 flex flex-col h-full">
+                                <div class="absolute top-2 right-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium shadow-sm">
+                                    Completed
+                                </div>
+                                
+                                <div class="flex flex-col md:flex-row flex-1">
+                                    <!-- Cottage Image -->
+                                    <div class="w-full md:w-1/3 h-32 md:h-auto bg-gray-200">
+                                        {% if reservation.cottage_image %}
+                                            <img src="{{ url_for('static', filename='cottage_images/' + reservation.cottage_image) }}" alt="Cottage {{ reservation.cottage_no }}" class="w-full h-full object-cover">
+                                        {% else %}
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <span class="text-gray-500">No Image</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <!-- Reservation Details -->
+                                    <div class="w-full md:w-2/3 p-4">
+                                        <div class="flex items-center mb-2">
+                                            <h2 class="text-xl font-bold text-gray-800">Cottage #{{ reservation.cottage_no }}</h2>
+                                            <span class="ml-2 px-3 py-1 bg-{{ reservation.flag_color|lower }}-100 text-{{ reservation.flag_color|lower }}-700 rounded-full text-xs">{{ reservation.flag_color }} Flag</span>
+                                        </div>
+                                        
+                                        <!-- Owner Info -->
+                                        <p class="text-gray-700 mb-2"><span class="font-medium">Owner:</span> {{ reservation.owner_name }}</p>
+                                        
+                                        <div class="grid grid-cols-2 gap-x-2 gap-y-1 mb-3">
+                                            <p class="text-gray-700"><span class="font-medium">Date:</span> {{ reservation.date_stay }}</p>
+                                            <p class="text-gray-700"><span class="font-medium">Time:</span> {{ reservation.start_time }} - {{ reservation.end_time }}</p>
+                                            <p class="text-gray-700"><span class="font-medium">Persons:</span> {{ reservation.max_persons }}</p>
+                                            {% if reservation.table_no %}
+                                            <p class="text-gray-700"><span class="font-medium">Table:</span> #{{ reservation.table_no }}</p>
+                                            {% endif %}
+                                            <p class="text-gray-700"><span class="font-medium">Amount:</span> ₱{{ reservation.amount }}</p>
+                                            <p class="text-gray-700"><span class="font-medium">Completed on:</span> {{ reservation.date_completed or "Auto-completed" }}</p>
+                                        </div>
+                                        
+                                        <!-- Amenities in compact form -->
+                                        {% if reservation.amenity_details %}
+                                            <div class="mt-2">
+                                                <h3 class="text-xs font-semibold text-gray-500 mb-1">Amenities:</h3>
+                                                <div class="flex flex-wrap gap-1">
+                                                    {% for amenity in reservation.amenity_details %}
+                                                        <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-xs">
+                                                            {{ amenity.category }}
+                                                        </span>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        
+                                        <!-- Rating button if not already rated -->
+                                        {% if not reservation.has_rating %}
+                                            <div class="mt-3">
+                                                <button onclick="openRatingModal('{{ reservation.id }}')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md text-sm transition duration-200 w-full md:w-auto">
+                                                    <i class="fas fa-star mr-1"></i> Rate Your Experience
+                                                </button>
+                                            </div>
+                                        {% else %}
+                                            <div class="mt-3">
+                                                <div class="bg-gray-100 text-gray-600 px-3 py-2 rounded-md text-sm flex items-center">
+                                                    <i class="fas fa-check-circle text-green-500 mr-2"></i> Thanks for your rating!
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10 bg-white rounded-lg shadow-sm">
+                        <div class="mb-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Completed Reservations</h3>
+                        <p class="text-gray-500">You don't have any completed cottage reservations yet.</p>
+                    </div>
+                {% endif %}
+                
+                <!-- Rating Modal -->
+                <div id="ratingModal" class="hidden fixed inset-0 z-50 overflow-auto bg-black bg-opacity-50 flex items-center justify-center">
+                    <div class="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+                        <div class="p-5 border-b">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-xl font-semibold text-gray-800">Rate Your Experience</h3>
+                                <button onclick="closeRatingModal()" class="text-gray-400 hover:text-gray-600">
+                                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <form id="ratingForm" action="{{ url_for('ratings.submit_rating') }}" method="POST">
+                            <input type="hidden" name="reservation_id" id="rating_reservation_id">
+                            <div class="p-5">
+                                <div class="mb-4">
+                                    <label class="block text-gray-700 text-sm font-bold mb-2">How would you rate your overall experience?</label>
+                                    <div class="flex justify-center space-x-2 mb-3">
+                                        <div class="star-rating flex">
+                                            {% for i in range(1, 6) %}
+                                                <button type="button" class="star" data-value="{{ i }}">
+                                                    <svg class="w-8 h-8 text-gray-300 hover:text-yellow-500" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.8-2.034c-.783-.57-.38-1.81.588-1.81h3.462a1 1 0 00.95-.69l1.07-3.292z"></path>
+                                                    </svg>
+                                                </button>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="rating_value" id="rating_value" required>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="comments" class="block text-gray-700 text-sm font-bold mb-2">Comments (Optional)</label>
+                                    <textarea id="comments" name="comments" rows="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+                                </div>
+                            </div>
+                            <div class="px-5 py-4 bg-gray-100 border-t flex justify-end">
+                                <button type="button" onclick="closeRatingModal()" class="mr-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none">
+                                    Cancel
+                                </button>
+                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 focus:outline-none">
+                                    Submit Rating
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Canceled Reservations Section -->
+            <div id="section-canceled" class="reservation-section hidden">
+                {% set canceled_reservations = [] %}
+                {% for res in past_reservations %}
+                    {% if res.cottage_status == 'canceled' or res.cottage_status == 'declined' %}
+                        {% set _ = canceled_reservations.append(res) %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if canceled_reservations %}
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        {% for reservation in canceled_reservations %}
+                            <div class="bg-white rounded-lg shadow-md overflow-hidden border-l-4 {% if reservation.cottage_status == 'canceled' %}border-red-500{% else %}border-orange-500{% endif %}">
+                                <div class="p-4">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <h2 class="text-lg font-bold text-gray-800">Cottage #{{ reservation.cottage_no }}</h2>
+                                        <span class="px-3 py-1 {% if reservation.cottage_status == 'canceled' %}bg-red-100 text-red-700{% else %}bg-orange-100 text-orange-700{% endif %} rounded-full text-xs font-medium">
+                                            {{ reservation.cottage_status|title }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="space-y-1 text-sm">
+                                        <p class="text-gray-700"><span class="font-medium">Owner:</span> {{ reservation.owner_name }}</p>
+                                        <p class="text-gray-700"><span class="font-medium">Date:</span> {{ reservation.date_stay }}</p>
+                                        <p class="text-gray-700"><span class="font-medium">Time:</span> {{ reservation.start_time }} - {{ reservation.end_time }}</p>
+                                        <p class="text-gray-700"><span class="font-medium">Amount:</span> ₱{{ reservation.amount }}</p>
+                                    </div>
+                                    
+                                    <!-- Compact amenities -->
+                                    {% if reservation.amenity_details %}
+                                        <div class="mt-3 pt-2 border-t border-gray-100">
+                                            <div class="flex flex-wrap gap-1">
+                                                {% for amenity in reservation.amenity_details %}
+                                                    <span class="bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded text-xs">
+                                                        {{ amenity.category }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-10 bg-white rounded-lg shadow-sm">
+                        <div class="mb-4 text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-700 mb-2">No Canceled Reservations</h3>
+                        <p class="text-gray-500">You don't have any canceled cottage reservations.</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        <!-- Book Another Cottage Button -->
+        <div class="text-center mt-8 mb-4">
+            <a href="{{ url_for('make-reservation.make_reservation') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-md transition duration-300 shadow-md">
+                <div class="flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Book Another Cottage
+                </div>
+            </a>
+        </div>
+
+
+         
+
+<div id="paymentModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-md w-full">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Choose Payment Method</h3>
+            <button onclick="closePaymentModal()" class="text-gray-500 hover:text-gray-700">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <p class="text-gray-600 mb-4">Please select your preferred payment method:</p>
+        
+        <div class="space-y-3" id="paymentOptions">
+            <button id="onlineBtn" onclick="showOnlinePaymentForm()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Pay Online Now
+            </button>
+            
+            <form id="onsitePaymentForm" method="POST" action="">
+                <input type="hidden" id="onsite_reservation_id" name="reservation_id">
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                    </svg>
+                    Pay On Site
+                </button>
+            </form>
+            
+            <button onclick="closePaymentModal()" class="w-full border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg">
+                Cancel
+            </button>
+        </div>
+        
+        <!-- Online Payment Form - Initially Hidden -->
+        <div id="onlinePaymentFormContainer" class="hidden">
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Online Payment Details</h3>
+                    <button onclick="backToPaymentOptions()" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                        Back
+                    </button>
+                </div>
+                
+                <div id="reservationDetails" class="bg-gray-50 p-4 rounded-lg mb-4">
+                    <!-- Reservation details will be loaded here -->
+                    <div class="skeleton-loader h-4 w-full bg-gray-200 rounded mb-2"></div>
+                    <div class="skeleton-loader h-4 w-3/4 bg-gray-200 rounded mb-2"></div>
+                    <div class="skeleton-loader h-4 w-1/2 bg-gray-200 rounded"></div>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center mb-4">
+                    <div id="qrCodeContainer" class="bg-white p-2 border border-gray-200 rounded-lg mb-2">
+                        <!-- QR code will be loaded here -->
+                        <div class="skeleton-loader h-48 w-48 bg-gray-200 rounded"></div>
+                    </div>
+                    <p class="text-sm text-gray-600">Scan to pay</p>
+                </div>
+            </div>
+            
+            <form id="onlinePaymentForm" method="POST" action="">
+                <input type="hidden" id="online_reservation_id" name="reservation_id">
+                
+                <div class="mb-4">
+                    <label for="reference_number" class="block text-sm font-medium text-gray-700 mb-1">Payment Reference Number</label>
+                    <input type="text" id="reference_number" name="reference_number" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Please enter the reference number from your payment transaction</p>
+                </div>
+                
+                <div class="flex space-x-3">
+                    <button type="button" onclick="backToPaymentOptions()" class="flex-1 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition duration-300">
+                        Cancel
+                    </button>
+                    <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition duration-300">
+                        Submit Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Cancel Reservation Modal -->
+<div id="cancelModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-bold text-gray-800">Cancel Reservation</h3>
+            <button onclick="closeCancelModal()" class="text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+        
+        <p class="text-gray-600 mb-6">Are you sure you want to cancel this reservation? This action cannot be undone.</p>
+        
+        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-yellow-700">
+                        If you cancel less than 24 hours before your reservation time, a cancellation fee may apply according to our policies.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <form id="cancelForm" action="{{ url_for('my_reservation.cancel_reservation') }}" method="post">
+            <input type="hidden" id="cancel_reservation_id" name="reservation_id" value="">
+            <div class="flex justify-end space-x-3">
+                <button type="button" onclick="closeCancelModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md transition duration-300">
+                    Go Back
+                </button>
+                <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition duration-300">
+                    Confirm Cancellation
+                </button>
+            </div>
+        </form>
+    </div>
+    </div>
+    
+  
+</div>
+</div>
+<script>
+    // Rating modal functionality
+    function openRatingModal(reservationId) {
+        document.getElementById('rating_reservation_id').value = reservationId;
+        document.getElementById('ratingModal').classList.remove('hidden');
+    }
+    
+    function closeRatingModal() {
+        document.getElementById('ratingModal').classList.add('hidden');
+    }
+    
+    // Star rating functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const stars = document.querySelectorAll('.star');
+        const ratingInput = document.getElementById('rating_value');
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const value = this.getAttribute('data-value');
+                ratingInput.value = value;
+                
+                // Reset all stars
+                stars.forEach(s => {
+                    s.querySelector('svg').classList.remove('text-yellow-500');
+                    s.querySelector('svg').classList.add('text-gray-300');
+                });
+                
+                // Fill stars up to selected one
+                for (let i = 0; i < value; i++) {
+                    stars[i].querySelector('svg').classList.remove('text-gray-300');
+                    stars[i].querySelector('svg').classList.add('text-yellow-500');
+                }
+            });
+        });
+    });
+</script>
+<script>
+    // Tab switching functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabs = document.querySelectorAll('.reservation-tab');
+        const sections = document.querySelectorAll('.reservation-section');
+        
+        tabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remove active class from all tabs
+                tabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.classList.remove('border-blue-500');
+                    t.classList.remove('text-blue-600');
+                    t.classList.add('border-transparent');
+                    t.classList.add('text-gray-600');
+                });
+                
+                // Add active class to clicked tab
+                this.classList.add('active');
+                this.classList.add('border-blue-500');
+                this.classList.add('text-blue-600');
+                this.classList.remove('border-transparent');
+                
+                // Hide all sections
+                sections.forEach(section => {
+                    section.classList.add('hidden');
+                });
+                
+                // Show corresponding section
+                const targetId = this.id.replace('tab-', 'section-');
+                document.getElementById(targetId).classList.remove('hidden');
+            });
+        });
+    });
+    
+    
+    </script>
+{% endblock %}
+

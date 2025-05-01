@@ -1,0 +1,250 @@
+<!-- templates/dashboard/dashboard.html -->
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
+    
+    <!-- Notification Alert -->
+    {% if current_user.role == 'owner' and unread_notifications > 0 %}
+    <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-6 rounded shadow" role="alert">
+        <div class="flex items-center">
+            <div class="py-1">
+                <svg class="h-6 w-6 text-blue-500 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                You have <span class="font-bold">{{ unread_notifications }}</span> unread notifications.
+                <a href="{{ url_for('owner.owner_notifications') }}" class="underline font-semibold hover:text-blue-800">View now</a>.
+            </div>
+            <button type="button" class="ml-auto" data-bs-dismiss="alert" aria-label="Close">
+                <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Stats for Owners -->
+    {% if current_user.role == 'owner' %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-blue-600 text-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-5">
+                <h5 class="text-lg font-medium mb-2">Total Cottages</h5>
+                <h2 class="text-4xl font-bold">{{ stats.total_cottages }}</h2>
+            </div>
+        </div>
+        <div class="bg-green-600 text-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-5">
+                <h5 class="text-lg font-medium mb-2">Total Tables</h5>
+                <h2 class="text-4xl font-bold">{{ stats.total_tables }}</h2>
+            </div>
+        </div>
+        <div class="bg-cyan-600 text-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-5">
+                <h5 class="text-lg font-medium mb-2">Total Reservations</h5>
+                <h2 class="text-4xl font-bold">{{ stats.total_reservations }}</h2>
+            </div>
+        </div>
+        <div class="bg-amber-500 text-white rounded-lg shadow-md overflow-hidden">
+            <div class="px-4 py-5">
+                <h5 class="text-lg font-medium mb-2">Monthly Revenue</h5>
+                <h2 class="text-4xl font-bold">₱{{ stats.monthly_revenue }}</h2>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Quick Links -->
+    <div class="bg-white rounded-lg shadow-md mb-8">
+        <div class="border-b px-6 py-3">
+            <h5 class="font-medium text-xl text-gray-700">Quick Links</h5>
+        </div>
+        <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% if current_user.role == 'owner' %}
+            <a href="{{ url_for('cottages.my_cottages') }}" class="bg-blue-50 hover:bg-blue-100 p-4 rounded-lg flex items-center">
+                <div class="bg-blue-500 p-3 rounded-full mr-4">
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="font-medium text-lg">Manage Cottages</h5>
+                    <p class="text-gray-600">Add or modify your cottages</p>
+                </div>
+            </a>
+        
+            <a href="{{ url_for('reservation.owner_reservations') }}" class="bg-green-50 hover:bg-green-100 p-4 rounded-lg flex items-center">
+                <div class="bg-green-500 p-3 rounded-full mr-4">
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="font-medium text-lg">All Reservations</h5>
+                    <p class="text-gray-600">View and manage reservations</p>
+                </div>
+            </a>
+        
+            <a href="{{ url_for('dashboard.dashboard_view') }}" class="bg-teal-50 hover:bg-teal-100 p-4 rounded-lg flex items-center">
+                <div class="bg-teal-500 p-3 rounded-full mr-4">
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17a4 4 0 01-4-4m0 0a4 4 0 014-4m0 0a4 4 0 014 4m0 0a4 4 0 01-4 4zM5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="font-medium text-lg">Analytics</h5>
+                    <p class="text-gray-600">View analytics reports</p>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Today's Reservations -->
+    <div class="bg-white rounded-lg shadow-md mb-8">
+        <div class="border-b px-6 py-3">
+            <h5 class="font-medium text-xl text-gray-700">Today's Reservations</h5>
+        </div>
+        <div class="p-6">
+            {% if todays_reservations %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Time</th>
+                            {% if current_user.role == 'owner' %}
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Customer</th>
+                            {% else %}
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Owner</th>
+                            {% endif %}
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Cottage</th>
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Table</th>
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for reservation in todays_reservations %}
+                        <tr>
+                            <td class="py-4 px-4 text-sm">{{ reservation.start_time }} - {{ reservation.end_time }}</td>
+                            {% if current_user.role == 'owner' %}
+                            <td class="py-4 px-4 text-sm">
+                                <div class="font-medium text-gray-900">{{ reservation.customer_name }}</div>
+                                <div class="text-gray-500">{{ reservation.customer_phone }}</div>
+                            </td>
+                            {% else %}
+                            <td class="py-4 px-4 text-sm">
+                                <div class="font-medium text-gray-900">{{ reservation.owner_name }}</div>
+                            </td>
+                            {% endif %}
+                            <td class="py-4 px-4 text-sm">
+                                <div class="font-medium text-gray-900">Cottage #{{ reservation.cottage_no }}</div>
+                                <div class="text-gray-500">{{ reservation.cottage_location }}</div>
+                            </td>
+                            <td class="py-4 px-4 text-sm">
+                                {% if reservation.table_no %}Table #{{ reservation.table_no }}{% else %}N/A{% endif %}
+                            </td>
+                            <td class="py-4 px-4 text-sm">
+                                {% if reservation.cottage_status == 'reserved' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Reserved</span>
+                                {% elif reservation.cottage_status == 'pending' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                {% elif reservation.cottage_status == 'cancelled' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Cancelled</span>
+                                {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{{ reservation.cottage_status|capitalize }}</span>
+                                {% endif %}
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 py-4">No reservations for today.</p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Upcoming Reservations -->
+    <div class="bg-white rounded-lg shadow-md">
+        <div class="border-b px-6 py-3">
+            <h5 class="font-medium text-xl text-gray-700">Upcoming Reservations</h5>
+        </div>
+        <div class="p-6">
+            {% if upcoming_reservations %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Date</th>
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Time</th>
+                            {% if current_user.role == 'owner' %}
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Customer</th>
+                            {% else %}
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Owner</th>
+                            {% endif %}
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Cottage</th>
+                            <th class="py-3 px-4 bg-gray-100 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Status</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        {% for reservation in upcoming_reservations %}
+                        <tr>
+                            <td class="py-4 px-4 text-sm">
+                                {{ reservation.date_stay}}
+                                <div class="text-xs text-gray-500">in {{ reservation.days_until|round|int }} days</div>
+                            </td>
+                            <td class="py-4 px-4 text-sm">{{ reservation.start_time }} - {{ reservation.end_time }}</td>
+                            {% if current_user.role == 'owner' %}
+                            <td class="py-4 px-4 text-sm">
+                                <div class="font-medium text-gray-900">{{ reservation.customer_name }}</div>
+                                <div class="text-gray-500">{{ reservation.customer_email }}</div>
+                            </td>
+                            {% else %}
+                            <td class="py-4 px-4 text-sm">
+                                <div class="font-medium text-gray-900">{{ reservation.owner_name }}</div>
+                            </td>
+                            {% endif %}
+                            <td class="py-4 px-4 text-sm">
+                                <div class="font-medium text-gray-900">Cottage #{{ reservation.cottage_no }}</div>
+                                <div class="text-gray-500">{{ reservation.cottage_location }}</div>
+                            </td>
+                            <td class="py-4 px-4 text-sm">
+                                {% if reservation.cottage_status == 'reserved' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Reserved</span>
+                                {% elif reservation.cottage_status == 'pending' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                {% elif reservation.cottage_status == 'cancelled' %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Cancelled</span>
+                                {% else %}
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{{ reservation.cottage_status|capitalize }}</span>
+                                {% endif %}
+                            </td>
+                            
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if upcoming_reservations|length >= 5 %}
+            <div class="mt-4 text-right">
+                <a href="{{ url_for('dashboard.reservations') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    View All Reservations
+                    <svg class="ml-2 -mr-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+            </div>
+            {% endif %}
+            {% else %}
+            <p class="text-gray-500 py-4">No upcoming reservations.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

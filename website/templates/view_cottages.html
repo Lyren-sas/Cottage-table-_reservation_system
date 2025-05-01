@@ -1,0 +1,121 @@
+<!-- website/templates/view_cottages.html -->
+{% extends "base.html" %}
+
+{% block title %}Cottages - Balugan Resort{% endblock %}
+
+{% block content %}
+<div class="py-8 bg-gray-50 min-h-screen">
+    <div class="max-w-6xl mx-auto px-4">
+        <h1 class="text-3xl font-bold mb-6 text-center text-gray-800">Our Cottages</h1>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="p-4 mb-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Date Selection -->
+        <div class="mb-6 bg-white rounded-lg shadow-md p-4">
+            <h2 class="text-lg font-semibold mb-2">Find Available Cottages</h2>
+            <form id="dateCheckForm" class="flex flex-wrap gap-4 items-end">
+                <div class="flex-grow">
+                    <label for="check_date" class="block text-gray-700 font-medium mb-2">Select Date</label>
+                    <input 
+                        type="date" 
+                        id="check_date" 
+                        class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        min="{{ today_date }}"
+                        value="{{ selected_date or today_date }}"
+                    />
+                </div>
+                <div>
+                    <button 
+                        type="button" 
+                        onclick="checkAvailability()"
+                        class="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition duration-300"
+                    >
+                        Check Availability
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Cottage Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
+            {% for cottage in cottages %}
+                <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1 h-full flex flex-col">
+                    {% if cottage.cottage_image %}
+                        <div class="w-full h-48 bg-gray-200 overflow-hidden">
+                            <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="Cottage #{{ cottage.cottage_no }}" class="w-full h-48 object-cover">
+                        </div>
+                    {% else %}
+                        <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
+                            <span class="text-gray-500">No Image</span>
+                        </div>
+                    {% endif %}
+                    
+                    <div class="p-4 flex flex-col flex-grow">
+                        <div class="flex items-center mb-2">
+                            <h2 class="text-xl font-bold text-gray-800">Cottage #{{ cottage.cottage_no }}</h2>
+                            <span class="ml-2 px-3 py-1 bg-{{ cottage.flag_color|lower }}-100 text-{{ cottage.flag_color|lower }}-700 rounded-full text-sm">{{ cottage.flag_color }} Flag</span>
+                        </div>
+                        
+                        {% if cottage.cottage_description %}
+                            <p class="text-gray-600 mb-4 flex-grow">{{ cottage.cottage_description|truncate(100) }}</p>
+                        {% endif %}
+                        
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-xs">Max: {{ cottage.max_persons }} persons</span>
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-md text-xs">₱{{ cottage.amount }}</span>
+                        </div>
+                        
+                        <a 
+                            href="{{ url_for('cottage-reservation.cottage_details', cottage_id=cottage.id, date=selected_date) }}" 
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition duration-300 font-medium mt-auto text-center"
+                        >
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Check availability for a specific date
+    function checkAvailability() {
+        const checkDate = document.getElementById('check_date').value;
+        if (!checkDate) {
+            alert('Please select a date to check availability.');
+            return;
+        }
+        
+        // Redirect to the same page with date parameter
+        window.location.href = "{{ url_for('cottage-reservation.view_cottages') }}?date=" + checkDate;
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Set min date to today
+        const dateInput = document.getElementById('check_date');
+        if (dateInput) {
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.min = today;
+            
+            // Use selected date if available, otherwise use today
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedDate = urlParams.get('date');
+            if (selectedDate) {
+                dateInput.value = selectedDate;
+            } else {
+                dateInput.value = today;
+            }
+        }
+    });
+</script>
+{% endblock %}
