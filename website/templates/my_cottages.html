@@ -3,233 +3,302 @@
 {% block title %}My Cottages - Balugan Cottage{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 border-2 border-gray-200">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">My Cottages</h1>
-        <div class="flex space-x-2">
-            <button id="cardViewBtn" class="bg-blue-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                <i class="fas fa-th mr-2"></i> Card View
-            </button>
-            <button id="tableViewBtn" class="bg-gray-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                <i class="fas fa-table mr-2"></i> Table View
-            </button>
-            <a href="{{ url_for('cottages.add_cottage') }}" class="bg-green-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                <i class="fas fa-plus mr-2"></i> Add New Cottage
-            </a>
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-[1920px] mx-auto px-6 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">My Cottages</h1>
+                    <p class="text-sm text-gray-500">Manage your cottage listings and reservations</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <button id="cardViewBtn" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow">
+                        <i class="fas fa-th mr-2"></i> Card View
+                    </button>
+                    <button id="tableViewBtn" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 shadow-sm hover:shadow">
+                        <i class="fas fa-table mr-2"></i> Table View
+                    </button>
+                    <a href="{{ url_for('cottages.add_cottage') }}" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 shadow-sm hover:shadow">
+                        <i class="fas fa-plus mr-2"></i> Add New Cottage
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        {% for category, message in messages %}
-        <div class="mb-4 p-4 rounded-md {% if category == 'error' %} bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}" id="flash-msg">
-            {{ message }}
+        <div class="max-w-[1920px] mx-auto px-6 mt-4">
+            {% for category, message in messages %}
+            <div class="rounded-lg p-4 mb-4 transform transition-all duration-300 {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}" id="flash-msg">
+                <div class="flex items-center">
+                    {% if category == 'error' %}
+                        <i class="fas fa-exclamation-circle mr-3 text-red-500"></i>
+                    {% else %}
+                        <i class="fas fa-check-circle mr-3 text-green-500"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
         <script>    
             setTimeout(function() {
                 const flashMsg = document.getElementById("flash-msg");
                 if (flashMsg) {
-                    flashMsg.remove();
+                    flashMsg.style.opacity = '0';
+                    flashMsg.style.transform = 'translateY(-10px)';
+                    setTimeout(() => flashMsg.remove(), 300);
                 }
-            }, 3000); // Show for 5 seconds
+            }, 3000);
         </script>
     {% endif %}
     {% endwith %}
 
-    {% if cottages and cottages|length > 0 %}
-    <!-- Card View -->
-    <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for cottage in cottages %}
-        <div class="bg-white rounded-lg shadow-md overflow-hidden border-2 border-gray-200">
-            {% if cottage.cottage_image %}
-            <div class="w-full h-48 bg-gray-200 overflow-hidden">
-                <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="{{ cottage.cottage_no }}" class="w-full h-48 object-cover">
-            </div>
-            {% else %}
-            <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
-                <span class="text-gray-500">No Image</span>
-            </div>
-            {% endif %}
-            
-            <div class="p-6">
-                <div class="flex justify-between items-start mb-4">
-                    <h3 class="text-xl font-bold text-gray-800">Cottage {{ cottage.cottage_no }}</h3>
-                    <span class="px-3 py-1 rounded-full text-sm font-medium {% if cottage.flag_color == 'Blue' %}bg-blue-400 text-white {% elif cottage.flag_color == 'Green' %}bg-green-300 text-green-800 {% elif cottage.flag_color == 'Red' %}bg-red-300 text-red-800 {% else %}bg-gray-200 text-gray-800{% endif %}">
-                        {{ cottage.flag_color }} Flag
-                    </span>
-                </div>
-                
-                <div class="mb-4">
-                    {% if cottage.cottage_location %}
-                    <p class="text-gray-600 mb-2"><strong>Location:</strong> {{ cottage.cottage_location }}</p>
+    <!-- Main Content -->
+    <div class="max-w-[1920px] mx-auto px-6 py-6">
+        {% if cottages and cottages|length > 0 %}
+        <!-- Card View -->
+        <div id="cardView" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
+            {% for cottage in cottages %}
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+                <!-- Cottage Image -->
+                <div class="relative h-48 bg-gray-100 group">
+                    {% if cottage.cottage_image %}
+                    <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" 
+                         alt="{{ cottage.cottage_no }}" 
+                         class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                        <i class="fas fa-home text-4xl text-gray-400"></i>
+                    </div>
                     {% endif %}
+                    <div class="absolute top-4 right-4">
+                        <span class="px-3 py-1 rounded-full text-sm font-medium shadow-sm
+                            {% if cottage.flag_color == 'Blue' %}bg-blue-100 text-blue-800
+                            {% elif cottage.flag_color == 'Green' %}bg-green-100 text-green-800
+                            {% elif cottage.flag_color == 'Red' %}bg-red-100 text-red-800
+                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                            {{ cottage.flag_color }} Flag
+                        </span>
+                    </div>
                 </div>
-                
-                <div class="flex justify-between">
-                    <a href="{{ url_for('cottages.edit_cottage', cottage_id=cottage.id) }}" class="bg-blue-600 hover:bg-black text-white px-4 py-2 rounded-md transition duration-300">
-                        Edit
-                    </a>
-                    <button onclick="confirmDelete('{{ cottage.id }}')" class="bg-red-600 hover:bg-black text-white px-4 py-2 rounded-md transition duration-300">
-                        Delete
-                    </button>
-                </div>
-                
-                <div class="mt-10 pt-10 border-t border-gray-200">
-                    <button onclick="openTablesModal('{{ cottage.id }}', '{{ cottage.cottage_no }}')" class="bg-indigo-600 hover:bg-black text-white px-4 py-2 rounded-md transition duration-300 w-full text-center block mb-4">
-                        <i class="fas fa-chair mr-1"></i> Manage Tables
-                        {% if cottage.tables_count and cottage.tables_count > 0 %}
-                        <span class="bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs ml-1">{{ cottage.tables_count }}</span>
-                        {% endif %}
 
-                    </button>
-                    <a href="{{ url_for('discoveries.cottage_discoveries', cottage_id=cottage.id) }}" class="bg-yellow-600 hover:bg-black text-white px-4 py-2 rounded-md transition duration-300 w-full text-center block mb-4">
-                        <i class="fas fa-camera-retro mr-1"></i> View Discoveries
-                        {% if cottage.discovery_count and cottage.discovery_count > 0 %}
-                        <span class="bg-white text-yellow-600 rounded-full px-2 py-0.5 text-xs ml-1">{{ cottage.discovery_count }}</span>
-                        {% endif %}
-                    </a>
+                <!-- Cottage Details -->
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900">Cottage {{ cottage.cottage_no }}</h3>
+                    </div>
                     
+                    {% if cottage.cottage_location %}
+                    <div class="mb-4">
+                        <p class="text-gray-600 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>
+                            {{ cottage.cottage_location }}
+                        </p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <a href="{{ url_for('cottages.edit_cottage', cottage_id=cottage.id) }}" 
+                           class="inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all duration-200 shadow-sm hover:shadow">
+                            <i class="fas fa-edit mr-2"></i> Edit
+                        </a>
+                        <button onclick="confirmDelete('{{ cottage.id }}')" 
+                                class="inline-flex items-center justify-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-all duration-200 shadow-sm hover:shadow">
+                            <i class="fas fa-trash-alt mr-2"></i> Delete
+                        </button>
+                    </div>
+
+                    <!-- Additional Actions -->
+                    <div class="space-y-3 pt-4 border-t border-gray-100">
+                        <button onclick="openTablesModal('{{ cottage.id }}', '{{ cottage.cottage_no }}')" 
+                                class="w-full inline-flex items-center justify-center px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all duration-200 shadow-sm hover:shadow">
+                            <i class="fas fa-chair mr-2"></i> Manage Tables
+                            {% if cottage.tables_count and cottage.tables_count > 0 %}
+                            <span class="ml-2 bg-white text-indigo-600 rounded-full px-2 py-0.5 text-xs shadow-sm">{{ cottage.tables_count }}</span>
+                            {% endif %}
+                        </button>
+                        
+                        <a href="{{ url_for('discoveries.cottage_discoveries', cottage_id=cottage.id) }}" 
+                           class="w-full inline-flex items-center justify-center px-4 py-2 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-all duration-200 shadow-sm hover:shadow">
+                            <i class="fas fa-camera-retro mr-2"></i> View Discoveries
+                            {% if cottage.discovery_count and cottage.discovery_count > 0 %}
+                            <span class="ml-2 bg-white text-yellow-600 rounded-full px-2 py-0.5 text-xs shadow-sm">{{ cottage.discovery_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
                 </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Table View -->
+        <div id="tableView" class="hidden bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cottage No.</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Flag Color</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for cottage in cottages %}
+                        <tr class="hover:bg-gray-50 transition-colors duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                {% if cottage.cottage_image %}
+                                <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" 
+                                     alt="{{ cottage.cottage_no }}" 
+                                     class="w-16 h-16 rounded-lg object-cover shadow-sm">
+                                {% else %}
+                                <div class="w-16 h-16 rounded-lg bg-gray-100 flex items-center justify-center shadow-sm">
+                                    <i class="fas fa-home text-gray-400"></i>
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm font-medium text-gray-900">Cottage {{ cottage.cottage_no }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium shadow-sm
+                                    {% if cottage.flag_color == 'Blue' %}bg-blue-100 text-blue-800
+                                    {% elif cottage.flag_color == 'Green' %}bg-green-100 text-green-800
+                                    {% elif cottage.flag_color == 'Red' %}bg-red-100 text-red-800
+                                    {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                    {{ cottage.flag_color }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                {{ cottage.cottage_location or 'N/A' }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 shadow-sm">
+                                    {{ cottage.status }}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('cottages.edit_cottage', cottage_id=cottage.id) }}" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-all duration-200 shadow-sm hover:shadow">
+                                        <i class="fas fa-edit mr-1.5"></i> Edit
+                                    </a>
+                                    <button onclick="confirmDelete('{{ cottage.id }}')" 
+                                            class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-all duration-200 shadow-sm hover:shadow">
+                                        <i class="fas fa-trash-alt mr-1.5"></i> Delete
+                                    </button>
+                                    <button onclick="openTablesModal('{{ cottage.id }}', '{{ cottage.cottage_no }}')" 
+                                            class="inline-flex items-center px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-lg hover:bg-indigo-100 transition-all duration-200 shadow-sm hover:shadow">
+                                        <i class="fas fa-chair mr-1.5"></i> Tables
+                                    </button>
+                                    <a href="{{ url_for('discoveries.cottage_discoveries', cottage_id=cottage.id) }}" 
+                                       class="inline-flex items-center px-3 py-1.5 bg-yellow-50 text-yellow-700 rounded-lg hover:bg-yellow-100 transition-all duration-200 shadow-sm hover:shadow">
+                                        <i class="fas fa-camera-retro mr-1.5"></i> Discoveries
+                                        {% if cottage.discovery_count and cottage.discovery_count > 0 %}
+                                        <span class="ml-1.5 bg-white text-yellow-600 rounded-full px-1.5 py-0.5 text-xs shadow-sm">{{ cottage.discovery_count }}</span>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
-        {% endfor %}
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-xl shadow-sm p-12 text-center max-w-2xl mx-auto">
+            <div class="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-6 shadow-sm">
+                <i class="fas fa-home text-4xl text-gray-400"></i>
+            </div>
+            <h3 class="text-2xl font-semibold text-gray-900 mb-3">No Cottages Added Yet</h3>
+            <p class="text-gray-500 mb-8 text-lg">Start by adding your first cottage to make it available for reservation.</p>
+            <a href="{{ url_for('cottages.add_cottage') }}" 
+               class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-sm hover:shadow-lg transform hover:-translate-y-0.5">
+                <i class="fas fa-plus mr-2"></i> Add Your First Cottage
+            </a>
+        </div>
+        {% endif %}
     </div>
-    
-    <!-- Table View -->
-    <div id="tableView" class="hidden overflow-x-auto">
-        <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-md">
-            <thead>
-                <tr class="bg-gray-100">
-                    <th class="py-3 px-4 text-left border-b border-gray-200 font-semibold text-gray-700">Image</th>
-                    <th class="py-3 px-4 text-left border-b border-gray-200 font-semibold text-gray-700">Cottage No.</th>
-                    <th class="py-3 px-4 text-left border-b border-gray-200 font-semibold text-gray-700">Flag Color</th>
-                    <th class="py-3 px-4 text-left border-b border-gray-200 font-semibold text-gray-700">Location</th>
-                    <th class="py-3 px-4 text-left border-b border-gray-200 font-semibold text-gray-700">Status</th>
-                    <th class="py-3 px-4 text-left border-b border-gray-200 font-semibold text-gray-700">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for cottage in cottages %}
-                <tr class="hover:bg-gray-50">
-                    <td class="py-3 px-4 border-b border-gray-200">
-                        {% if cottage.cottage_image %}
-                        <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="{{ cottage.cottage_no }}" class="w-16 h-16 object-cover rounded">
-                        {% else %}
-                        <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded">
-                            <span class="text-gray-500 text-xs">No Image</span>
-                        </div>
-                        {% endif %}
-                    </td>
-                    <td class="py-3 px-4 border-b border-gray-200">{{ cottage.cottage_no }}</td>
-                    <td class="py-3 px-4 border-b border-gray-200">
-                        <span class="px-3 py-1 rounded-full text-sm font-medium 
-                            {% if cottage.flag_color == 'Blue' %}bg-blue-400 text-white
-                            {% elif cottage.flag_color == 'Green' %}bg-green-300 text-green-800
-                            {% elif cottage.flag_color == 'Red' %}bg-red-300 text-red-800
-                            {% else %}bg-gray-200 text-gray-800{% endif %}">
-                            {{ cottage.flag_color }}
-                        </span>
-                    </td>
-                    <td class="py-3 px-4 border-b border-gray-200">{{ cottage.cottage_location or 'N/A' }}</td>
-                    <td class="py-3 px-4 border-b border-gray-200">
-                        <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">{{ cottage.status }}</span>
-                    </td>
-                    <td class="py-3 px-4 border-b border-gray-200">
-                        <div class="flex space-x-2">
-                            <a href="{{ url_for('cottages.edit_cottage', cottage_id=cottage.id) }}" class="bg-blue-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                Edit
-                            </a>
-                            <button 
-                                onclick="confirmDelete('{{ cottage.id }}')" 
-                                class="bg-red-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                Delete
-                            </button>
-                            <button 
-                                onclick="openTablesModal('{{ cottage.id }}', '{{ cottage.cottage_no }}')" 
-                                class="bg-indigo-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                Tables
-                            </button>
-                            <a href="{{ url_for('discoveries.cottage_discoveries', cottage_id=cottage.id) }}" class="bg-yellow-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                Discoveries
-                                {% if cottage.discovery_count and cottage.discovery_count > 0 %}
-                                <span class="bg-white text-yellow-600 rounded-full px-2 py-0.5 text-xs ml-1">{{ cottage.discovery_count }}</span>
-                                {% endif %}
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    {% else %}
-    <div class="bg-gray-100 rounded-lg p-8 text-center">
-        <h3 class="text-xl font-medium text-gray-700 mb-4">You haven't added any cottages yet</h3>
-        <p class="text-gray-600 mb-6">Start by adding your first cottage to make it available for reservation.</p>
-        <a href="{{ url_for('cottages.add_cottage') }}" class="bg-blue-600 hover:bg-black text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-            Add Your First Cottage
-        </a>
-    </div>
-    {% endif %}
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96 border-2 border-gray-300 relative">
-        <h2 class="text-2xl font-bold mb-4 text-gray-800">Confirm Deletion</h2>
-        <p class="text-gray-600 mb-6">Are you sure you want to delete this cottage? This action cannot be undone.</p>
-
-        <form id="deleteForm" method="POST" action="">
-            <div class="flex justify-end space-x-4">
-                <button type="button" onclick="closeDeleteModal()" class="bg-gray-400 hover:bg-black text-white px-4 py-2 rounded-md">
-                    Cancel
-                </button>
-                <button type="submit" class="bg-red-600 hover:bg-black text-white px-4 py-2 rounded-md">
-                    Delete
-                </button>
+<div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4 transform transition-all duration-300 scale-95 opacity-0" id="deleteModalContent">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 rounded-full mb-4">
+                <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
             </div>
-        </form>
+            <h2 class="text-2xl font-bold text-center text-gray-900 mb-3">Confirm Deletion</h2>
+            <p class="text-gray-600 text-center mb-8">Are you sure you want to delete this cottage? This action cannot be undone.</p>
+
+            <form id="deleteForm" method="POST" action="">
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeDeleteModal()" 
+                            class="px-6 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 shadow-sm hover:shadow">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 shadow-sm hover:shadow">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Tables Management Modal -->
 <div id="tablesModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white rounded-lg shadow-md border-2 border-gray-300 w-11/12 md:w-3/4 lg:w-2/3 max-h-5/6 overflow-y-auto">
+    <div class="bg-white rounded-xl shadow-lg w-11/12 md:w-3/4 lg:w-2/3 max-h-[90vh] overflow-hidden">
         <div class="p-6 border-b border-gray-200">
             <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-bold text-gray-800">Tables for Cottage <span id="modalCottageNo"></span></h2>
-                <button onclick="closeTablesModal()" class="text-gray-500 hover:text-gray-700">
+                <h2 class="text-2xl font-bold text-gray-900">Tables for Cottage <span id="modalCottageNo" class="text-blue-600"></span></h2>
+                <button type="button" onclick="closeTablesModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
         </div>
         
-        <div class="p-6">
+        <div class="p-6 overflow-y-auto max-h-[calc(90vh-8rem)]">
             <div id="tablesLoading" class="text-center py-8">
-                <i class="fas fa-spinner fa-spin text-3xl text-blue-600"></i>
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
                 <p class="mt-2 text-gray-600">Loading tables...</p>
             </div>
             
             <div id="tablesContent" class="hidden">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-700">Manage Tables</h3>
-                    <div class="flex space-x-2">
-                        <button id="tableCardViewBtn" class="bg-blue-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0 mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900">Manage Tables</h3>
+                    <div class="flex flex-wrap gap-3">
+                        <button type="button" id="tableCardViewBtn" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
                             <i class="fas fa-th mr-2"></i> Card View
                         </button>
-                        <button id="tableTableViewBtn" class="bg-gray-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                        <button type="button" id="tableTableViewBtn" class="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
                             <i class="fas fa-table mr-2"></i> Table View
                         </button>
-                        <button id="addTableBtn" class="bg-green-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
+                        <button type="button" id="addTableBtn" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
                             <i class="fas fa-plus mr-2"></i> Add Table
                         </button>
                     </div>
                 </div>
                 
-                <div id="noTablesMessage" class="bg-gray-100 rounded-lg p-6 text-center hidden">
-                    <h3 class="text-xl font-medium text-gray-700 mb-4">No Tables Added Yet</h3>
+                <div id="noTablesMessage" class="hidden bg-gray-50 rounded-xl p-8 text-center">
+                    <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-chair text-2xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-xl font-medium text-gray-900 mb-2">No Tables Added Yet</h3>
                     <p class="text-gray-600 mb-4">Add tables to this cottage to manage seating arrangements.</p>
+                    <button type="button" onclick="openAddTableForm()" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        <i class="fas fa-plus mr-2"></i> Add Your First Table
+                    </button>
                 </div>
                 
                 <!-- Card View for Tables -->
@@ -238,19 +307,19 @@
                 </div>
                 
                 <!-- Table View for Tables -->
-                <div id="tableTableView" class="overflow-x-auto hidden">
-                    <table class="min-w-full bg-white border border-gray-200 rounded-lg">
-                        <thead>
-                            <tr class="bg-gray-50">
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Table Number</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Capacity</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Price</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">Actions</th>
+                <div id="tableTableView" class="hidden overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Table Number</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Capacity</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="tablesTableBody">
-                            
+                        <tbody id="tablesTableBody" class="bg-white divide-y divide-gray-200">
+                            <!-- Table rows will be inserted here dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -259,383 +328,478 @@
     </div>
 </div>
 
+<!-- Delete Table Confirmation Modal -->
+<div id="deleteTableModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+        <div class="p-6">
+            <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+                <i class="fas fa-exclamation-triangle text-xl text-red-600"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-center text-gray-900 mb-2">Confirm Deletion</h2>
+            <p class="text-gray-600 text-center mb-6">Are you sure you want to delete this table? This action cannot be undone.</p>
+
+            <form id="deleteTableForm" method="POST" action="">
+                <div class="flex justify-end space-x-4">
+                    <button type="button" onclick="closeDeleteTableModal()" 
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                        Delete
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- Add/Edit Table Form Modal -->
 <div id="tableFormModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96 border-2 border-gray-300 relative">
-        <h2 id="tableFormTitle" class="text-2xl font-bold mb-4 text-gray-800">Add Table</h2>
-        
-        <form id="tableForm" enctype="multipart/form-data">
-            <input type="hidden" id="editTableId" value="">
-            <div class="mb-4">
-                <label for="table_no" class="block text-gray-700 font-medium mb-2">Table Number *</label>
-                <input type="text" id="table_no" name="table_no" class="w-full px-4 py-2 border rounded-lg" required>
-            </div>
-            
-            <div class="mb-4">
-                <label for="capacity" class="block text-gray-700 font-medium mb-2">Capacity (Persons) *</label>
-                <input type="number" id="capacity" name="capacity" min="1" class="w-full px-4 py-2 border rounded-lg" required>
-            </div>
-            
-            <div class="mb-4">
-                <label for="price" class="block text-gray-700 font-medium mb-2">Price *</label>
-                <input type="number" id="price" name="price" min="0" step="0.01" class="w-full px-4 py-2 border rounded-lg" required>
-                <p class="text-sm text-gray-500 mt-1">Price per booking</p>
-            </div>
-            
-            <div class="mb-6">
-                <label for="table_image" class="block text-gray-700 font-medium mb-2">Table Image</label>
-                <input type="file" id="table_image" name="table_image" class="w-full px-4 py-2 border rounded-lg" accept="image/*">
-                <p class="text-sm text-gray-500 mt-1">Optional: Upload an image of the table</p>
-            </div>
-            
-            <div class="flex justify-end space-x-4">
-                <button type="button" onclick="closeTableFormModal()" class="bg-gray-400 hover:bg-black text-white px-4 py-2 rounded-md">
-                    Cancel
-                </button>
-                <button type="submit" id="tableFormSubmitBtn" class="bg-green-600 hover:bg-black text-white px-4 py-2 rounded-md">
-                    Save Table
+    <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+        <div class="p-6">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="tableFormTitle" class="text-2xl font-bold text-gray-900">Add Table</h2>
+                <button type="button" onclick="closeTableFormModal()" class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-        </form>
-    </div>
-</div>
-
-
-
-<!-- Discoveries Modal -->
-<div id="discoveryModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96 border-2 border-gray-300 relative">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">Add Discovery</h2>
-            <button onclick="closeDiscoveryModal()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times text-xl"></i>
-            </button>
+            
+            <form id="tableForm" enctype="multipart/form-data">
+                <input type="hidden" id="editTableId" value="">
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="table_no" class="block text-sm font-medium text-gray-700 mb-1">Table Number *</label>
+                        <input type="text" id="table_no" name="table_no" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               required>
+                    </div>
+                    
+                    <div>
+                        <label for="capacity" class="block text-sm font-medium text-gray-700 mb-1">Capacity (Persons) *</label>
+                        <input type="number" id="capacity" name="capacity" min="1" 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                               required>
+                    </div>
+                    
+                    <div>
+                        <label for="price" class="block text-sm font-medium text-gray-700 mb-1">Price *</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-700">₱</span>
+                            <input type="number" id="price" name="price" min="0" step="0.01" 
+                                   class="w-full pl-8 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
+                                   required>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Price per booking</p>
+                    </div>
+                    
+                    <div>
+                        <label for="table_image" class="block text-sm font-medium text-gray-700 mb-1">Table Image</label>
+                        <div class="relative flex items-center space-x-3">
+                            <input type="file" id="table_image" name="table_image" 
+                                   class="hidden" accept="image/*" 
+                                   onchange="document.getElementById('table_image_filename').textContent = this.files[0]?.name || ''">
+                            <button type="button" onclick="document.getElementById('table_image').click()" 
+                                    class="flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-black text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <span id="table_image_filename" class="text-gray-600 text-sm"></span>
+                        </div>
+                        <p class="mt-1 text-sm text-gray-500">Optional: Upload an image of the table</p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" onclick="closeTableFormModal()" 
+                            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                        Cancel
+                    </button>
+                    <button type="submit" id="tableFormSubmitBtn" 
+                            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200">
+                        Save Table
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <form id="discoveryForm" enctype="multipart/form-data">
-            <input type="hidden" id="discoveryCottageId" value="">
-            
-            <div class="mb-4">
-                <label for="discovery_image" class="block text-gray-700 font-medium mb-2">Discovery Image *</label>
-                <input type="file" id="discovery_image" name="discovery_image" class="w-full px-4 py-2 border rounded-lg" accept="image/*" required>
-            </div>
-            
-            <div class="mb-6">
-                <label for="description" class="block text-gray-700 font-medium mb-2">Description</label>
-                <textarea id="description" name="description" rows="4" class="w-full px-4 py-2 border rounded-lg"></textarea>
-            </div>
-            
-            <div class="flex justify-end space-x-4">
-                <button type="button" onclick="closeDiscoveryModal()" class="bg-gray-400 hover:bg-black text-white px-4 py-2 rounded-md">
-                    Cancel
-                </button>
-                <button type="submit" id="discoveryFormSubmitBtn" class="bg-green-600 hover:bg-black text-white px-4 py-2 rounded-md">
-                    Save Discovery
-                </button>
-            </div>
-        </form>
     </div>
 </div>
-
 
 <script>
-    // Discovery modal functions
-    function openDiscoveryModal(cottageId, cottageNo) {
-        document.getElementById('discoveryCottageId').value = cottageId;
-        document.getElementById('discoveryModal').classList.remove('hidden');
-    }
-    
-    function closeDiscoveryModal() {
-        document.getElementById('discoveryForm').reset();
-        document.getElementById('discoveryModal').classList.add('hidden');
-    }
-    
-    // Submit discovery form via AJAX
-    document.getElementById('discoveryForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const cottageId = document.getElementById('discoveryCottageId').value;
-        const formData = new FormData(this);
-        
-        fetch(`/cottage/${cottageId}/add-discovery/ajax`, {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Show success message
-                const flashContainer = document.createElement('div');
-                flashContainer.className = 'mb-4 p-4 rounded-md bg-green-100 text-green-700';
-                flashContainer.textContent = 'Discovery added successfully!';
-                document.querySelector('.container').prepend(flashContainer);
-                
-                // Auto-remove message after 5 seconds
-                setTimeout(() => {
-                    flashContainer.remove();
-                }, 5000);
-                
-                // Close modal and refresh page
-                closeDiscoveryModal();
-                location.reload();
-            } else {
-                alert('Error: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while adding the discovery');
-        });
-    });
-
-   
-document.getElementById('cardViewBtn').addEventListener('click', function() {
-    document.getElementById('cardView').classList.remove('hidden');
-    document.getElementById('tableView').classList.add('hidden');
-    this.classList.add('bg-blue-600');
-    this.classList.remove('bg-gray-600');
-    document.getElementById('tableViewBtn').classList.add('bg-gray-600');
-    document.getElementById('tableViewBtn').classList.remove('bg-blue-600');
-});
-
-document.getElementById('tableViewBtn').addEventListener('click', function() {
-    document.getElementById('cardView').classList.add('hidden');
-    document.getElementById('tableView').classList.remove('hidden');
-    this.classList.add('bg-blue-600');
-    this.classList.remove('bg-gray-600');
-    document.getElementById('cardViewBtn').classList.add('bg-gray-600');
-    document.getElementById('cardViewBtn').classList.remove('bg-blue-600');
-});
-document.getElementById('addTableBtn')?.addEventListener('click', function() {
-    // Reset form
-    document.getElementById('tableForm').reset();
-    document.getElementById('editTableId').value = '';
-    document.getElementById('tableFormTitle').textContent = 'Add Table';
-    
-    // Show form modal
-    document.getElementById('tableFormModal').classList.remove('hidden');
-});
-// Delete modal functions
-function confirmDelete(cottageId) {
-    // Set the form action to the correct delete URL
-    const deleteForm = document.getElementById('deleteForm');
-    deleteForm.action = `/delete-cottage/${cottageId}`;
-    
-    // Show the delete modal
-    document.getElementById('deleteModal').classList.remove('hidden');
+// Discovery modal functions
+function openDiscoveryModal(cottageId, cottageNo) {
+    document.getElementById('discoveryCottageId').value = cottageId;
+    document.getElementById('discoveryModal').classList.remove('hidden');
 }
 
-function closeDeleteModal() {
-    // Hide the delete modal
-    document.getElementById('deleteModal').classList.add('hidden');
+function closeDiscoveryModal() {
+    document.getElementById('discoveryForm').reset();
+    document.getElementById('discoveryModal').classList.add('hidden');
 }
 
-// Tables modal functions
-let currentCottageId = null;
-
-function openTablesModal(cottageId, cottageNo) {
-    currentCottageId = cottageId;
-    document.getElementById('modalCottageNo').textContent = cottageNo;
-    document.getElementById('tablesModal').classList.remove('hidden');
-    
-    // Show loading indicator
-    document.getElementById('tablesLoading').classList.remove('hidden');
-    document.getElementById('tablesContent').classList.add('hidden');
-    
-    // Load tables data
-    loadTables(cottageId);
-}
-
-function closeTablesModal() {
-    document.getElementById('tablesModal').classList.add('hidden');
-    currentCottageId = null;
-}
-
-function loadTables(cottageId) {
-    fetch(`/cottage/${cottageId}/tables/data`)
-        .then(response => response.json())
-        .then(data => {
-            // Hide loading indicator
-            document.getElementById('tablesLoading').classList.add('hidden');
-            document.getElementById('tablesContent').classList.remove('hidden');
-            
-            if (data.tables && data.tables.length > 0) {
-                document.getElementById('noTablesMessage').classList.add('hidden');
-                
-                // Populate card view
-                const cardContainer = document.getElementById('tableCardView');
-                cardContainer.innerHTML = '';
-                
-                // Populate table view
-                const tableBody = document.getElementById('tablesTableBody');
-                tableBody.innerHTML = '';
-                
-                data.tables.forEach(table => {
-                    // Add card for table
-                    const card = document.createElement('div');
-                    card.className = 'bg-white rounded-lg shadow-md overflow-hidden border border-gray-200';
-                    card.innerHTML = `
-                        <div class="w-full h-32 bg-gray-200 overflow-hidden">
-                            <img src="${table.image_url}" alt="Table ${table.table_no}" class="w-full h-32 object-cover">
-                        </div>
-                        <div class="p-4">
-                            <h3 class="text-lg font-bold text-gray-800">Table ${table.table_no}</h3>
-                            <p class="text-gray-600 mb-2">Capacity: ${table.capacity} persons</p>
-                            <p class="text-gray-600 mb-4">Price: ${table.formatted_price}</p>
-                            <div class="flex justify-between">
-                                <button onclick="editTable(${table.id})" class="bg-blue-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                    Edit
-                                </button>
-                                <button onclick="deleteTable(${table.id})" class="bg-red-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                    Delete
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    cardContainer.appendChild(card);
-                    
-                    // Add row for table
-                    const row = document.createElement('tr');
-                    row.className = 'hover:bg-gray-50';
-                    row.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap border-b">${table.table_no}</td>
-                        <td class="px-6 py-4 whitespace-nowrap border-b">${table.capacity} persons</td>
-                        <td class="px-6 py-4 whitespace-nowrap border-b">
-                            <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">${table.status}</span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap border-b">${table.formatted_price}</td>
-                        <td class="px-6 py-4 whitespace-nowrap border-b">
-                            <div class="flex space-x-2">
-                                <button onclick="editTable(${table.id})" class="bg-blue-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                    Edit
-                                </button>
-                                <button onclick="deleteTable(${table.id})" class="bg-red-600 hover:bg-black text-white px-3 py-1 rounded text-sm transition duration-300">
-                                    Delete
-                                </button>
-                            </div>
-                        </td>
-                    `;
-                    tableBody.appendChild(row);
-                });
-            } else {
-                document.getElementById('noTablesMessage').classList.remove('hidden');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading tables:', error);
-            document.getElementById('tablesLoading').classList.add('hidden');
-            document.getElementById('tablesContent').classList.remove('hidden');
-            document.getElementById('noTablesMessage').classList.remove('hidden');
-            document.getElementById('noTablesMessage').innerHTML = `
-                <h3 class="text-xl font-medium text-red-700 mb-4">Error Loading Tables</h3>
-                <p class="text-gray-600 mb-4">There was an error loading the tables.</p>
-            `;
-        });
-}
-
-// Table view toggles
-document.getElementById('tableCardViewBtn')?.addEventListener('click', function() {
-    document.getElementById('tableCardView').classList.remove('hidden');
-    document.getElementById('tableTableView').classList.add('hidden');
-    this.classList.add('bg-blue-600');
-    this.classList.remove('bg-gray-600');
-    document.getElementById('tableTableViewBtn').classList.add('bg-gray-600');
-    document.getElementById('tableTableViewBtn').classList.remove('bg-blue-600');
-});
-
-document.getElementById('tableTableViewBtn')?.addEventListener('click', function() {
-    document.getElementById('tableCardView').classList.add('hidden');
-    document.getElementById('tableTableView').classList.remove('hidden');
-    this.classList.add('bg-blue-600');
-    this.classList.remove('bg-gray-600');
-    document.getElementById('tableCardViewBtn').classList.add('bg-gray-600');
-    document.getElementById('tableCardViewBtn').classList.remove('bg-blue-600');
-});
-
-// Add new table
-document.getElementById('addTableBtn')?.addEventListener('click', function() {
-    // Reset form
-    document.getElementById('tableForm').reset();
-    document.getElementById('editTableId').value = '';
-    document.getElementById('tableFormTitle').textContent = 'Add Table';
-    
-    // Show form modal
-    document.getElementById('tableFormModal').classList.remove('hidden');
-});
-
-function closeTableFormModal() {
-    document.getElementById('tableFormModal').classList.add('hidden');
-}
-
-// Handle table form submission
-document.getElementById('tableForm')?.addEventListener('submit', function(e) {
+// Submit discovery form via AJAX
+document.getElementById('discoveryForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    const cottageId = document.getElementById('discoveryCottageId').value;
     const formData = new FormData(this);
-    const tableId = document.getElementById('editTableId').value;
     
-    let url;
-    if (tableId) {
-        // Edit existing table
-        url = `/cottage/${currentCottageId}/edit-table/${tableId}/ajax`;
-    } else {
-        // Add new table
-        url = `/cottage/${currentCottageId}/add-table/ajax`;
-    }
-    
-    fetch(url, {
+    fetch(`/cottage/${cottageId}/add-discovery/ajax`, {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            closeTableFormModal();
-            loadTables(currentCottageId);
+            // Show success message
+            const flashContainer = document.createElement('div');
+            flashContainer.className = 'mb-4 p-4 rounded-md bg-green-100 text-green-700';
+            flashContainer.textContent = 'Discovery added successfully!';
+            document.querySelector('.container').prepend(flashContainer);
+            
+            // Auto-remove message after 5 seconds
+            setTimeout(() => {
+                flashContainer.remove();
+            }, 5000);
+            
+            // Close modal and refresh page
+            closeDiscoveryModal();
+            location.reload();
         } else {
             alert('Error: ' + data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while saving the table');
+        alert('An error occurred while adding the discovery');
     });
 });
 
-// Edit table function
-function editTable(tableId) {
-    // TODO: Implement edit functionality
-    alert('Edit table ' + tableId);
-}
+// View toggle functionality
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize view toggles
+    initializeViewToggles();
+    
+    // Initialize table management
+    initializeTableManagement();
+    
+    // Initialize modals
+    initializeModals();
+});
 
-// Delete table function
-function deleteTable(tableId) {
-    // TODO: Implement delete functionality
-    if (confirm('Are you sure you want to delete this table?')) {
-        fetch(`/cottage/${currentCottageId}/delete-table/${tableId}/ajax`, {
-            method: 'POST'
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                loadTables(currentCottageId);
+function initializeViewToggles() {
+    const cardViewBtn = document.getElementById('cardViewBtn');
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const cardView = document.getElementById('cardView');
+    const tableView = document.getElementById('tableView');
+
+    if (cardViewBtn && tableViewBtn) {
+        function setActiveView(view) {
+            if (view === 'card') {
+                cardView.classList.remove('hidden');
+                tableView.classList.add('hidden');
+                cardViewBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                cardViewBtn.classList.add('bg-blue-600', 'text-white');
+                tableViewBtn.classList.remove('bg-blue-600', 'text-white');
+                tableViewBtn.classList.add('bg-gray-100', 'text-gray-700');
             } else {
-                alert('Error: ' + data.message);
+                cardView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                tableViewBtn.classList.remove('bg-gray-100', 'text-gray-700');
+                tableViewBtn.classList.add('bg-blue-600', 'text-white');
+                cardViewBtn.classList.remove('bg-blue-600', 'text-white');
+                cardViewBtn.classList.add('bg-gray-100', 'text-gray-700');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred while deleting the table');
-        });
+        }
+
+        // Set initial view
+        setActiveView('card');
+
+        cardViewBtn.addEventListener('click', () => setActiveView('card'));
+        tableViewBtn.addEventListener('click', () => setActiveView('table'));
     }
 }
 
+function initializeTableManagement() {
+    const addTableBtn = document.getElementById('addTableBtn');
+    const tableForm = document.getElementById('tableForm');
+    
+    if (addTableBtn) {
+        addTableBtn.addEventListener('click', openAddTableForm);
+    }
+    
+    if (tableForm) {
+        tableForm.addEventListener('submit', handleTableFormSubmit);
+    }
+}
 
+function initializeModals() {
+    // Close modals when clicking outside
+    window.addEventListener('click', function(e) {
+        const modals = {
+            'deleteModal': closeDeleteModal,
+            'tablesModal': closeTablesModal,
+            'tableFormModal': closeTableFormModal,
+            'deleteTableModal': closeDeleteTableModal
+        };
+        
+        for (const [modalId, closeFunction] of Object.entries(modals)) {
+            const modal = document.getElementById(modalId);
+            if (modal && e.target === modal) {
+                closeFunction();
+            }
+        }
+    });
 
+    // Close modals with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeDeleteModal();
+            closeTablesModal();
+            closeTableFormModal();
+            closeDeleteTableModal();
+        }
+    });
+}
 
+// Table management functions
+function openAddTableForm() {
+    const form = document.getElementById('tableForm');
+    const title = document.getElementById('tableFormTitle');
+    const submitBtn = document.getElementById('tableFormSubmitBtn');
+    
+    if (form && title && submitBtn) {
+        form.reset();
+        document.getElementById('editTableId').value = '';
+        title.textContent = 'Add Table';
+        submitBtn.textContent = 'Add Table';
+        document.getElementById('tableFormModal').classList.remove('hidden');
+    }
+}
+
+function openEditTableForm(tableId) {
+    const table = currentCottageTables.find(t => t.id == tableId);
+    if (!table) return;
+    
+    const form = document.getElementById('tableForm');
+    const title = document.getElementById('tableFormTitle');
+    const submitBtn = document.getElementById('tableFormSubmitBtn');
+    
+    if (form && title && submitBtn) {
+        document.getElementById('table_no').value = table.table_no;
+        document.getElementById('capacity').value = table.capacity;
+        document.getElementById('price').value = table.price;
+        document.getElementById('editTableId').value = tableId;
+        
+        title.textContent = 'Edit Table';
+        submitBtn.textContent = 'Update Table';
+        
+        document.getElementById('tableFormModal').classList.remove('hidden');
+    }
+}
+
+async function handleTableFormSubmit(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const tableId = document.getElementById('editTableId').value;
+    const isEdit = tableId !== '';
+    
+    try {
+        const url = isEdit 
+            ? `/cottage/${currentCottageId}/edit-table/${tableId}/ajax`
+            : `/cottage/${currentCottageId}/add-table/ajax`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to save table');
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            await fetchTables(currentCottageId);
+            closeTableFormModal();
+            showToast(isEdit ? 'Table updated successfully!' : 'Table added successfully!', 'success');
+        } else {
+            showToast(result.message || 'Error saving table', 'error');
+        }
+    } catch (error) {
+        console.error('Error saving table:', error);
+        showToast('Error saving table. Please try again.', 'error');
+    }
+}
+
+// Modal close functions
+function closeTableFormModal() {
+    const modal = document.getElementById('tableFormModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        document.getElementById('tableForm')?.reset();
+    }
+}
+
+function closeTablesModal() {
+    const modal = document.getElementById('tablesModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        currentCottageId = null;
+        currentCottageTables = [];
+    }
+}
+
+function closeDeleteModal() {
+    const modal = document.getElementById('deleteModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function closeDeleteTableModal() {
+    const modal = document.getElementById('deleteTableModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+// Toast notification
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `fixed bottom-4 right-4 p-4 rounded-md shadow-md z-50 ${
+        type === 'error' ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+    }`;
+    toast.innerHTML = message;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+function renderTableCard(table) {
+    return `
+        <div class="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-200">
+            <div class="relative h-48 bg-gray-100">
+                ${table.table_image ? 
+                    `<img src="/static/table_images/${table.table_image}" alt="Table ${table.table_no}" class="w-full h-full object-cover">` :
+                    `<div class="w-full h-full flex items-center justify-center bg-gray-100">
+                        <i class="fas fa-chair text-4xl text-gray-400"></i>
+                    </div>`
+                }
+            </div>
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="text-xl font-semibold text-gray-900">Table ${table.table_no}</h3>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                        ${table.status}
+                    </span>
+                </div>
+                
+                <div class="space-y-2 mb-4">
+                    <p class="text-gray-600 flex items-center">
+                        <i class="fas fa-users mr-2 text-gray-400"></i>
+                        Capacity: ${table.capacity} persons
+                    </p>
+                    <p class="text-gray-600 flex items-center">
+                        <i class="fas fa-tag mr-2 text-gray-400"></i>
+                        Price: ₱${parseFloat(table.price).toFixed(2)}
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="openEditTableForm('${table.id}')" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                        <i class="fas fa-edit mr-2"></i> Edit
+                    </button>
+                    <button onclick="confirmDeleteTable('${table.id}')" 
+                            class="inline-flex items-center justify-center px-4 py-2 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                        <i class="fas fa-trash-alt mr-2"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function renderTableRow(table) {
+    return `
+        <tr class="hover:bg-gray-50">
+            <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                    ${table.table_image ? 
+                        `<img src="/static/table_images/${table.table_image}" alt="Table ${table.table_no}" class="w-12 h-12 rounded-lg object-cover mr-3">` :
+                        `<div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mr-3">
+                            <i class="fas fa-chair text-gray-400"></i>
+                        </div>`
+                    }
+                    <span class="font-medium text-gray-900">Table ${table.table_no}</span>
+                </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ${table.capacity} persons
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+                <span class="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800">
+                    ${table.status}
+                </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                ₱${parseFloat(table.price).toFixed(2)}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <div class="flex space-x-2">
+                    <button onclick="openEditTableForm('${table.id}')" 
+                            class="inline-flex items-center px-3 py-1 bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i> Edit
+                    </button>
+                    <button onclick="confirmDeleteTable('${table.id}')" 
+                            class="inline-flex items-center px-3 py-1 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors duration-200">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `;
+}
+
+function confirmDeleteTable(tableId) {
+    const modal = document.getElementById('deleteTableModal');
+    const form = document.getElementById('deleteTableForm');
+    if (modal && form) {
+        form.action = `/cottage/${currentCottageId}/delete-table/${tableId}`;
+        modal.classList.remove('hidden');
+    }
+}
+
+// Add this to your existing script
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate modals
+    const deleteModal = document.getElementById('deleteModal');
+    const deleteModalContent = document.getElementById('deleteModalContent');
+    
+    if (deleteModal && deleteModalContent) {
+        deleteModal.addEventListener('show', function() {
+            deleteModalContent.classList.remove('scale-95', 'opacity-0');
+            deleteModalContent.classList.add('scale-100', 'opacity-100');
+        });
+    }
+    
+    // Add hover effects to cards
+    const cards = document.querySelectorAll('#cardView > div');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-4px)';
+        });
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+        });
+    });
+});
 </script>
-
-
-
 
 {% endblock %}

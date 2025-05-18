@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_login import login_required, current_user
 from datetime import datetime, timedelta
+import sqlite3
 from .models import get_db_connection, OwnerCottage, CottageTable, Reservation, Notification, User, OwnerNotification
 
 dashboard = Blueprint('dashboard', __name__)
@@ -43,6 +44,9 @@ def dashboard_view():
     today = today_date.strftime('%Y-%m-%d')  # for SQL queries
     formatted_today = today_date.strftime('%B %d %Y')  # for display
     
+    # Debug - print today's date format
+    print(f"Today's date for query: {today}")
+    
     # Get today's reservations
     todays_reservations = []
     if current_user.role == 'owner':
@@ -50,7 +54,9 @@ def dashboard_view():
             cottage_ids = [c.id for c in user_cottages]
             placeholders = ','.join('?' * len(cottage_ids))
             cursor = conn.cursor()
-            cursor.execute(f'''
+            
+            # Modified query to be more inclusive and debug date matching
+            query = f'''
                 SELECT r.*, 
                        u.name as customer_name,
                        u.email as customer_email, 
@@ -58,18 +64,25 @@ def dashboard_view():
                        oc.cottage_no,
                        oc.cottage_location,
                        oc.cottage_image,
-                       t.table_no
+                       t.table_no,
+                       r.date_stay as debug_date
                 FROM reservations r
                 INNER JOIN users u ON r.user_id = u.id
                 INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
                 LEFT JOIN cottage_tables t ON r.table_id = t.id
                 WHERE r.cottage_id IN ({placeholders})
-                AND r.cottage_status IN ('reserved', 'approved')
+                AND r.cottage_status IN ('reserved', 'approved', 'pending')
                 AND r.date_stay = ?
                 ORDER BY r.start_time ASC
-            ''', cottage_ids + [today])
+            '''
             
+            cursor.execute(query, cottage_ids + [today])
             todays_reservations = cursor.fetchall()
+            
+            # Debug - print number of results
+            print(f"Found {len(todays_reservations)} reservations for today")
+            if len(todays_reservations) > 0:
+                print(f"Sample date from DB: {todays_reservations[0]['debug_date']}")
     else:
         cursor = conn.execute('''
             SELECT r.*, 
@@ -77,18 +90,71 @@ def dashboard_view():
                    oc.cottage_location,
                    oc.cottage_image,
                    u.name as owner_name, 
-                   t.table_no
+                   t.table_no,
+                   r.date_stay as debug_date
             FROM reservations r
             INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
             INNER JOIN users u ON oc.user_id = u.id
             LEFT JOIN cottage_tables t ON r.table_id = t.id
             WHERE r.user_id = ?
-            AND r.cottage_status IN ('reserved', 'approved')
+            AND r.cottage_status IN ('reserved', 'approved', 'pending')
             AND r.date_stay = ?
             ORDER BY r.start_time ASC
         ''', (current_user.id, today))
         
         todays_reservations = cursor.fetchall()
+        # Debug - print number of results
+        print(f"Found {len(todays_reservations)} reservations for today (user)")
+    
+    # Alternate approach if the above doesn't work - try with date format conversion
+    if not todays_reservations:
+        print("No reservations found with direct comparison, trying with date formatting...")
+        if current_user.role == 'owner':
+            if user_cottages:
+                cottage_ids = [c.id for c in user_cottages]
+                placeholders = ','.join('?' * len(cottage_ids))
+                cursor = conn.cursor()
+                
+                query = f'''
+                    SELECT r.*, 
+                           u.name as customer_name,
+                           u.email as customer_email, 
+                           u.phone as customer_phone,
+                           oc.cottage_no,
+                           oc.cottage_location,
+                           oc.cottage_image,
+                           t.table_no
+                    FROM reservations r
+                    INNER JOIN users u ON r.user_id = u.id
+                    INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
+                    LEFT JOIN cottage_tables t ON r.table_id = t.id
+                    WHERE r.cottage_id IN ({placeholders})
+                    AND r.cottage_status IN ('reserved', 'approved', 'pending')
+                    AND date(r.date_stay) = date(?)
+                    ORDER BY r.start_time ASC
+                '''
+                
+                cursor.execute(query, cottage_ids + [today])
+                todays_reservations = cursor.fetchall()
+        else:
+            cursor = conn.execute('''
+                SELECT r.*, 
+                       oc.cottage_no, 
+                       oc.cottage_location,
+                       oc.cottage_image,
+                       u.name as owner_name, 
+                       t.table_no
+                FROM reservations r
+                INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
+                INNER JOIN users u ON oc.user_id = u.id
+                LEFT JOIN cottage_tables t ON r.table_id = t.id
+                WHERE r.user_id = ?
+                AND r.cottage_status IN ('reserved', 'approved', 'pending')
+                AND date(r.date_stay) = date(?)
+                ORDER BY r.start_time ASC
+            ''', (current_user.id, today))
+            
+            todays_reservations = cursor.fetchall()
     
     # Get upcoming reservations (excluding today)
     upcoming_reservations = []
@@ -159,25 +225,52 @@ def dashboard_view():
             query = f'SELECT COUNT(*) as count FROM reservations WHERE cottage_id IN ({placeholders})'
             cursor = conn.execute(query, cottage_ids)
             stats['total_reservations'] = cursor.fetchone()['count']
+            
+            # Count pending reservations
+            query = f'''
+                SELECT COUNT(*) as count 
+                FROM reservations 
+                WHERE cottage_id IN ({placeholders}) 
+                AND cottage_status = 'pending'
+            '''
+            cursor = conn.execute(query, cottage_ids)
+            stats['pending_reservations'] = cursor.fetchone()['count']
         else:
             stats['total_reservations'] = 0
+            stats['pending_reservations'] = 0
         
-        first_day = datetime.now().replace(day=1).strftime('%B %d %Y')
+        # Calculate monthly revenue using the payments table
+        first_day = datetime.now().replace(day=1).strftime('%Y-%m-%d')
         last_day = (datetime.now().replace(day=1) + timedelta(days=31)).replace(day=1) - timedelta(days=1)
         last_day = last_day.strftime('%Y-%m-%d')
         
         if cottage_ids:
             placeholders = ','.join('?' * len(cottage_ids))
             query = f'''
-                SELECT SUM(amount) as total FROM reservations 
-                WHERE cottage_id IN ({placeholders}) 
-                AND date_stay BETWEEN ? AND ?
-                AND cottage_status = 'reserved'
+                SELECT SUM(p.amount) as total 
+                FROM payments p
+                JOIN reservations r ON p.reservation_id = r.id
+                WHERE r.cottage_id IN ({placeholders}) 
+                AND p.payment_date BETWEEN ? AND ?
+                AND p.payment_status = 'completed'
             '''
             params = cottage_ids + [first_day, last_day]
             cursor = conn.execute(query, params)
             result = cursor.fetchone()
             stats['monthly_revenue'] = result['total'] if result and result['total'] else 0
+            
+            # As a fallback, if no payments found in the payments table
+            if stats['monthly_revenue'] == 0:
+                query = f'''
+                    SELECT SUM(amount) as total FROM reservations 
+                    WHERE cottage_id IN ({placeholders}) 
+                    AND date_stay BETWEEN ? AND ?
+                    AND cottage_status = 'reserved'
+                '''
+                params = cottage_ids + [first_day, last_day]
+                cursor = conn.execute(query, params)
+                result = cursor.fetchone()
+                stats['monthly_revenue'] = result['total'] if result and result['total'] else 0
         else:
             stats['monthly_revenue'] = 0
     
@@ -529,114 +622,4 @@ def table_reservations(table_id):
                           table=table,
                           reservations=table_reservations)
 
-@dashboard.route('/dashboard/analytics')
-@login_required
-def analytics():
-    """Show analytics and insights for cottage owners"""
-    if current_user.role != 'owner':
-        flash('You do not have permission to view this page', 'danger')
-        return redirect(url_for('dashboard.dashboard_view'))
-    
-    conn = get_db_connection()
-    cottages = OwnerCottage.get_cottages_by_user_id(conn, current_user.id)
-    cottage_ids = [c.id for c in cottages]
-    
-    # Initialize analytics data
-    analytics_data = {
-        'total_reservations': 0,
-        'total_revenue': 0,
-        'reservation_status': {
-            'pending': 0,
-            'reserved': 0,
-            'cancelled': 0,
-            'rejected': 0
-        },
-        'monthly_revenue': [],
-        'cottage_performance': []
-    }
-    
-    if cottage_ids:
-        placeholders = ','.join('?' * len(cottage_ids))
-        
-        # Total reservations and revenue
-        query = f'''
-            SELECT COUNT(*) as count, SUM(amount) as total
-            FROM reservations
-            WHERE cottage_id IN ({placeholders})
-        '''
-        cursor = conn.execute(query, cottage_ids)
-        result = cursor.fetchone()
-        
-        if result:
-            analytics_data['total_reservations'] = result['count']
-            analytics_data['total_revenue'] = result['total'] or 0
-        
-        # Reservation status counts
-        query = f'''
-            SELECT cottage_status, COUNT(*) as count
-            FROM reservations
-            WHERE cottage_id IN ({placeholders})
-            GROUP BY cottage_status
-        '''
-        cursor = conn.execute(query, cottage_ids)
-        
-        for row in cursor.fetchall():
-            status = row['cottage_status']
-            if status in analytics_data['reservation_status']:
-                analytics_data['reservation_status'][status] = row['count']
-        
-        # Monthly revenue for the past 6 months
-        months = []
-        for i in range(5, -1, -1):
-            date = datetime.now() - timedelta(days=30*i)
-            first_day = date.replace(day=1).strftime('%Y-%m-%d')
-            last_day = (date.replace(day=1) + timedelta(days=31)).replace(day=1) - timedelta(days=1)
-            last_day = last_day.strftime('%Y-%m-%d')
-            months.append((date.strftime('%B %Y'), first_day, last_day))
-        
-        for month_name, first_day, last_day in months:
-            query = f'''
-                SELECT SUM(amount) as total
-                FROM reservations
-                WHERE cottage_id IN ({placeholders})
-                AND date_stay BETWEEN ? AND ?
-                AND cottage_status = 'reserved'
-            '''
-            params = cottage_ids + [first_day, last_day]
-            cursor = conn.execute(query, params)
-            result = cursor.fetchone()
-            
-            analytics_data['monthly_revenue'].append({
-                'month': month_name,
-                'revenue': result['total'] if result and result['total'] else 0
-            })
-        
-        # Cottage performance
-        for cottage in cottages:
-            # Reservations count
-            cursor = conn.execute('''
-                SELECT COUNT(*) as count
-                FROM reservations
-                WHERE cottage_id = ? AND cottage_status = 'reserved'
-            ''', (cottage.id,))
-            reservations_count = cursor.fetchone()['count']
-            
-            # Revenue
-            cursor = conn.execute('''
-                SELECT SUM(amount) as total
-                FROM reservations
-                WHERE cottage_id = ? AND cottage_status = 'reserved'
-            ''', (cottage.id,))
-            revenue = cursor.fetchone()['total'] or 0
-            
-            analytics_data['cottage_performance'].append({
-                'cottage_id': cottage.id,
-                'cottage_no': cottage.cottage_no,
-                'reservations': reservations_count,
-                'revenue': revenue
-            })
-    
-    conn.close()
-    
-    return render_template('dashboard/analytics.html', 
-                          analytics=analytics_data)
+

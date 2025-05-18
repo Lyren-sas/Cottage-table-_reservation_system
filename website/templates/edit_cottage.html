@@ -3,9 +3,9 @@
 {% block title %}Edit Cottage - Balugan Cottage{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 border-2 border-gray-200">
-    <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold text-gray-800">Edit Cottage</h1>
+<div class="container mx-auto px-2 py-4">
+    <div class="flex justify-between items-center mb-4">
+        <h1 class="text-2xl font-bold text-gray-800">Edit Cottage</h1>
         <a href="{{ url_for('cottages.my_cottages') }}" class="bg-gray-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
             <i class="fas fa-arrow-left mr-2"></i> Back to My Cottages
         </a>
@@ -14,7 +14,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-        <div class="mb-4 p-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% elif category == 'warning' %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %}" id="flash-msg">
+        <div class="mb-3 p-3 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% elif category == 'warning' %}bg-yellow-100 text-yellow-700{% else %}bg-green-100 text-green-700{% endif %}" id="flash-msg">
             {{ message }}
         </div>
         {% endfor %}
@@ -30,80 +30,93 @@
     {% endif %}
     {% endwith %}
 
-    <div class="bg-white rounded-lg shadow-md overflow-hidden p-6 border-2 border-gray-200">
+    <div class="bg-white rounded-lg shadow-md overflow-hidden p-4 border border-gray-200">
         <form method="POST" enctype="multipart/form-data">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                    <label for="cottage_no" class="block text-gray-700 font-medium mb-2">Cottage Number *</label>
-                    <input type="text" id="cottage_no" name="cottage_no" class="w-full px-4 py-2 border rounded-lg" value="{{ cottage.cottage_no }}" required>
+                    <label for="cottage_no" class="block text-gray-700 font-medium mb-1">Cottage Number *</label>
+                    <input type="text" id="cottage_no" name="cottage_no" class="w-full px-3 py-2 border rounded-lg" value="{{ cottage.cottage_no }}" required>
                 </div>
                 
                 <div>
-                    <label for="flag_color" class="block text-gray-700 font-medium mb-2">Flag Color *</label>
-                    <select id="flag_color" name="flag_color" class="w-full px-4 py-2 border rounded-lg" onchange="toggleColorInput()">
+                    <label for="flag_color" class="block text-gray-700 font-medium mb-1">Flag Color *</label>
+                    <select id="flag_color" name="flag_color" class="w-full px-3 py-2 border rounded-lg" onchange="toggleColorInput()">
                         <option value="Blue" {% if cottage.flag_color == 'Blue' %}selected{% endif %}>Blue</option>
                         <option value="Green" {% if cottage.flag_color == 'Green' %}selected{% endif %}>Green</option>
                         <option value="Red" {% if cottage.flag_color == 'Red' %}selected{% endif %}>Red</option>
                         <option value="Other" {% if cottage.flag_color not in ['Blue', 'Green', 'Red'] %}selected{% endif %}>Other (specify)</option>
                     </select>
                     
-                    <div id="other_color_div" class="{% if cottage.flag_color not in ['Blue', 'Green', 'Red'] %}block{% else %}hidden{% endif %} mt-3">
-                        <label for="new_color" class="block text-gray-700 font-medium mb-2">Specify Color</label>
-                        <input type="text" id="new_color" name="new_color" class="w-full px-4 py-2 border rounded-lg" value="{% if cottage.flag_color not in ['Blue', 'Green', 'Red'] %}{{ cottage.flag_color }}{% endif %}">
+                    <div id="other_color_div" class="{% if cottage.flag_color not in ['Blue', 'Green', 'Red'] %}block{% else %}hidden{% endif %} mt-2">
+                        <label for="new_color" class="block text-gray-700 font-medium mb-1">Specify Color</label>
+                        <input type="text" id="new_color" name="new_color" class="w-full px-3 py-2 border rounded-lg" value="{% if cottage.flag_color not in ['Blue', 'Green', 'Red'] %}{{ cottage.flag_color }}{% endif %}">
                     </div>
                 </div>
                 
                 <div>
-                    <label for="cottage_location" class="block text-gray-700 font-medium mb-2">Cottage Location</label>
-                    <input type="text" id="cottage_location" name="cottage_location" class="w-full px-4 py-2 border rounded-lg" value="{{ cottage.cottage_location }}">
+                    <label for="cottage_location" class="block text-gray-700 font-medium mb-1">Cottage Location</label>
+                    <input type="text" id="cottage_location" name="cottage_location" class="w-full px-3 py-2 border rounded-lg" value="{{ cottage.cottage_location }}">
                 </div>
                 
-                <div>
-                    <label for="cottage_image" class="block text-gray-700 font-medium mb-2">Cottage Image</label>
+                <div class="md:col-span-3">
+                    <label for="cottage_image" class="block text-gray-700 font-medium mb-1">Cottage Image</label>
                     {% if cottage.cottage_image %}
                     <div class="mb-2">
                         <p class="text-sm text-gray-600">Current Image:</p>
-                        <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="Current Image" class="h-32 w-auto object-cover rounded-md">
+                        <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="Current Image" class="h-24 w-auto object-cover rounded-md">
                     </div>
                     {% endif %}
-                    <input type="file" id="cottage_image" name="cottage_image" class="w-full px-4 py-2 border rounded-lg" accept="image/*">
+                    <div class="relative flex items-center space-x-3">
+                        <input type="file" id="cottage_image" name="cottage_image" class="hidden" accept="image/*" onchange="document.getElementById('cottage_image_filename').textContent = this.files[0]?.name || ''">
+                        <button type="button" onclick="document.getElementById('cottage_image').click()" class="flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-black text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        
+                        <span id="cottage_image_filename" class="text-gray-600 text-sm"></span>
+                    </div>
                     <p class="text-sm text-gray-500 mt-1">Leave empty to keep current image</p>
                 </div>
                 
-                <div class="md:col-span-2">
-                    <label for="cottage_description" class="block text-gray-700 font-medium mb-2">Cottage Description</label>
-                    <textarea id="cottage_description" name="cottage_description" rows="4" class="w-full px-4 py-2 border rounded-lg">{{ cottage.cottage_description }}</textarea>
+                <div class="md:col-span-3">
+                    <label for="cottage_description" class="block text-gray-700 font-medium mb-1">Cottage Description</label>
+                    <textarea id="cottage_description" name="cottage_description" rows="3" class="w-full px-3 py-2 border rounded-lg">{{ cottage.cottage_description }}</textarea>
                 </div>
             
                 <!-- Tables Section -->
-                <div class="md:col-span-2 mt-6">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Tables</h3>
+                <div class="md:col-span-3 mt-4">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-3">Tables</h3>
                     
                     {% if tables %}
-                    <div id="existing-tables">
+                    <div id="existing-tables" class="space-y-3">
                         {% for table in tables %}
-                        <div class="table-row grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4 pb-4 border-b" id="table-row-{{ table.id }}">
+                        <div class="table-row grid grid-cols-1 md:grid-cols-4 gap-3 items-center p-3 border rounded-lg" id="table-row-{{ table.id }}">
                             <input type="hidden" name="table_ids" value="{{ table.id }}">
                             
                             <div>
-                                <label class="block text-gray-700 font-medium mb-2">Table Number</label>
-                                <input type="text" name="table_no_{{ table.id }}" value="{{ table.table_no }}" class="w-full px-4 py-2 border rounded-lg" required>
+                                <label class="block text-gray-700 font-medium mb-1">Table Number</label>
+                                <input type="text" name="table_no_{{ table.id }}" value="{{ table.table_no }}" class="w-full px-3 py-2 border rounded-lg" required>
                             </div>
                             
                             <div>
-                                <label class="block text-gray-700 font-medium mb-2">Capacity</label>
-                                <input type="number" name="table_capacity_{{ table.id }}" value="{{ table.capacity }}" class="w-full px-4 py-2 border rounded-lg" required min="1">
+                                <label class="block text-gray-700 font-medium mb-1">Capacity</label>
+                                <input type="number" name="table_capacity_{{ table.id }}" value="{{ table.capacity }}" class="w-full px-3 py-2 border rounded-lg" required min="1">
                             </div>
                             
                             <div>
-                                <label class="block text-gray-700 font-medium mb-2">Table Image</label>
+                                <label class="block text-gray-700 font-medium mb-1">Table Image</label>
                                 {% if table.table_image %}
                                 <div class="mb-2">
                                     <p class="text-sm text-gray-600">Current Image:</p>
-                                    <img src="{{ url_for('static', filename='table_images/' + table.table_image) }}" alt="Table Image" class="h-24 w-auto object-cover rounded-md">
+                                    <img src="{{ url_for('static', filename='table_images/' + table.table_image) }}" alt="Table Image" class="h-20 w-auto object-cover rounded-md">
                                 </div>
                                 {% endif %}
-                                <input type="file" name="table_image_{{ table.id }}" class="w-full px-4 py-2 border rounded-lg" accept="image/*">
+                                <div class="relative flex items-center space-x-3">
+                                    <input type="file" name="table_image_{{ table.id }}" id="table_image_{{ table.id }}" class="hidden" accept="image/*" onchange="document.getElementById('table_image_filename_{{ table.id }}').textContent = this.files[0]?.name || ''">
+                                    <button type="button" onclick="document.getElementById('table_image_{{ table.id }}').click()" class="flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-black text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <span id="table_image_filename_{{ table.id }}" class="text-gray-600 text-sm"></span>
+                                </div>
                                 <p class="text-sm text-gray-500 mt-1">Leave empty to keep current image</p>
                             </div>
                             
@@ -117,22 +130,22 @@
                         {% endfor %}
                     </div>
                     {% else %}
-                    <p class="text-gray-500 mb-4">No tables added yet.</p>
+                    <p class="text-gray-500 mb-3">No tables added yet.</p>
                     {% endif %}
                     
-                    <div id="new-tables-container"></div>
+                    <div id="new-tables-container" class="space-y-3"></div>
                     
                     <input type="hidden" id="new_table_count" name="new_table_count" value="0">
                     <input type="hidden" id="delete_table_ids" name="delete_table_ids" value="">
                     
-                    <button type="button" id="add-new-table-btn" class="mt-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
+                    <button type="button" id="add-new-table-btn" class="mt-3 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
                         <i class="fas fa-plus mr-2"></i> Add New Table
                     </button>
                 </div>
             </div>
             
-            <div class="mt-8 flex justify-end">
-                <a href="{{ url_for('cottages.my_cottages') }}" class="bg-gray-500 hover:bg-black text-white font-bold py-2 px-4 rounded-lg mr-4 transition duration-300">
+            <div class="mt-6 flex justify-end">
+                <a href="{{ url_for('cottages.my_cottages') }}" class="bg-gray-500 hover:bg-black text-white font-bold py-2 px-4 rounded-lg mr-3 transition duration-300">
                     Cancel
                 </a>
                 <button type="submit" class="bg-blue-600 hover:bg-black text-white font-bold py-2 px-4 rounded-lg transition duration-300">
@@ -186,7 +199,13 @@
                 
                 <div>
                     <label class="block text-gray-700 font-medium mb-2">Table Image</label>
-                    <input type="file" name="new_table_image_${newTableCount-1}" class="w-full px-4 py-2 border rounded-lg" accept="image/*">
+                    <div class='relative flex items-center space-x-3'>
+                        <input type='file' name='new_table_image_${newTableCount-1}' id='new_table_image_${newTableCount-1}' class='hidden' accept='image/*' onchange="document.getElementById('new_table_image_filename_${newTableCount-1}').textContent = this.files[0]?.name || ''">
+                        <button type='button' onclick="document.getElementById('new_table_image_${newTableCount-1}').click()" class='flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-black text-white rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500'>
+                            <i class='fas fa-plus'></i>
+                        </button>
+                        <span id='new_table_image_filename_${newTableCount-1}' class='text-gray-600 text-sm'></span>
+                    </div>
                     <p class="text-sm text-gray-500 mt-1">Upload an image of the table (optional)</p>
                 </div>
                 

@@ -3,7 +3,6 @@ from flask_login import UserMixin
 from datetime import datetime
 import sqlite3
 
-
 def dict_factory(cursor, row):
     d = {}
     for idx, col in enumerate(cursor.description):
@@ -17,7 +16,7 @@ def get_db_connection():
     return conn
 
 class User(UserMixin):
-    def __init__(self, id=None, email=None, username=None, password=None, date_created=None, name=None, role=None, user_image=None, user_phone=None):
+    def __init__(self, id=None, email=None, username=None, password=None, date_created=None, name=None, role=None, user_image=None, phone=None, security_question=None, security_answer=None):
         self.id = id
         self.email = email
         self.username = username
@@ -35,7 +34,9 @@ class User(UserMixin):
         self.name = name
         self.role = role or "user"
         self.user_image = user_image
-        self.phone = user_phone
+        self.phone = phone
+        self.security_question = security_question
+        self.security_answer = security_answer
     
     @classmethod
     def get_user_by_email(cls, conn, email):
@@ -53,9 +54,12 @@ class User(UserMixin):
                 name=user_data['name'],
                 role=user_data['role'],
                 user_image=user_data['user_image'],
-                user_phone=user_data['phone']  # Get phone from database 'phone' column
+                phone=user_data['phone'],
+                security_question=user_data['security_question'],
+                security_answer=user_data['security_answer']
             )
         return None
+    
     @classmethod
     def get_user_by_id(cls, conn, user_id):
         conn.row_factory = sqlite3.Row
@@ -72,7 +76,9 @@ class User(UserMixin):
                 name=user_data['name'],
                 role=user_data['role'],
                 user_image=user_data['user_image'],
-                user_phone=user_data['phone']  # Get phone from database 'phone' column
+                phone=user_data['phone'],
+                security_question=user_data['security_question'],
+                security_answer=user_data['security_answer']
             )
         return None
     
@@ -92,7 +98,9 @@ class User(UserMixin):
                 name=user_data['name'],
                 role=user_data['role'],
                 user_image=user_data['user_image'],
-                user_phone=user_data['phone']  # Get phone from database 'phone' column
+                phone=user_data['phone'],
+                security_question=user_data['security_question'],
+                security_answer=user_data['security_answer']
             )
         return None
     
@@ -100,10 +108,10 @@ class User(UserMixin):
         cursor = conn.cursor()
         cursor.execute(
             '''
-            INSERT INTO users (email, username, user_pass, date_created, name, role, user_image, phone)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (email, username, user_pass, date_created, name, role, user_image, phone, security_question, security_answer)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''',
-            (self.email, self.username, self.password, self.date_created, self.name, self.role, self.user_image, self.phone)
+            (self.email, self.username, self.password, self.date_created, self.name, self.role, self.user_image, self.phone, self.security_question, self.security_answer)
         )
         conn.commit()
         self.id = cursor.lastrowid
@@ -124,16 +132,14 @@ class User(UserMixin):
         cursor = conn.cursor()
         cursor.execute(
             '''
-            UPDATE users 
-            SET email = ?, username = ?, user_pass = ?, date_created = ?, name = ?, role = ?, user_image = ?, phone = ?
-            WHERE id = ?
+            UPDATE users SET email=?, username=?, user_pass=?, name=?, role=?, user_image=?, phone=?, security_question=?, security_answer=? WHERE id=?
             ''',
-            (self.email, self.username, self.password, self.date_created, self.name, self.role, self.user_image, self.phone, self.id)
+            (self.email, self.username, self.password, self.name, self.role, self.user_image, self.phone, self.security_question, self.security_answer, self.id)
         )
-        conn.commit()  # Added commit which was missing in original code
+        conn.commit()
 
 class Owner(UserMixin):     
-    def __init__(self, id=None, email=None, username=None, password=None, date_created=None, name=None, role=None, user_image=None, phone=None, notification_pref=None, preferred_location=None):         
+    def __init__(self, id=None, email=None, username=None, password=None, date_created=None, name=None, role=None, user_image=None, phone=None, notification_pref=None, preferred_location=None, security_question=None, security_answer=None):         
         self.id = id         
         self.email = email         
         self.username = username         
@@ -144,7 +150,9 @@ class Owner(UserMixin):
         self.user_image = user_image         
         self.phone = phone         
         self.notification_pref = notification_pref         
-        self.preferred_location = preferred_location      
+        self.preferred_location = preferred_location         
+        self.security_question = security_question         
+        self.security_answer = security_answer      
     
     @classmethod     
     def get_owner_by_email(cls, conn, email):         
@@ -161,7 +169,9 @@ class Owner(UserMixin):
                 name=user_data['name'],                 
                 role=user_data['role'],                 
                 user_image=user_data['user_image'],                 
-                phone=user_data['phone'] if 'phone' in user_data.keys() else None             
+                phone=user_data['phone'] if 'phone' in user_data.keys() else None,             
+                security_question=user_data['security_question'],
+                security_answer=user_data['security_answer']
             )         
         return None      
     
@@ -180,31 +190,43 @@ class Owner(UserMixin):
                 name=user_data['name'],                 
                 role=user_data['role'],                 
                 user_image=user_data['user_image'],                 
-                phone=user_data['phone'] if 'phone' in user_data.keys() else None         
+                phone=user_data['phone'] if 'phone' in user_data.keys() else None,         
+                security_question=user_data['security_question'],
+                security_answer=user_data['security_answer']
             )         
-        return None              
+        return None     
+             
+    def save_to_db(self, conn):
+        cursor = conn.cursor()
+        cursor.execute(
+            '''
+            INSERT INTO users (email, username, user_pass, date_created, name, role, user_image, phone, security_question, security_answer)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''',
+            (self.email, self.username, self.password, self.date_created, self.name, self.role, self.user_image, self.phone, self.security_question, self.security_answer)
+        )
+        conn.commit()
+        self.id = cursor.lastrowid
+        return self.id
     
+
     def update_in_db(self, conn):         
         """         
         Update owner information in the database.         
         This method is called when updating profile information.         
         """         
-        cursor = conn.cursor()         
-        cursor.execute('''             
-            UPDATE users              
-            SET name = ?, phone = ?, user_image = ?,                  
-                notification_pref = ?, preferred_location = ?, user_pass = ?             
-            WHERE id = ?         
-        ''', (             
-            self.name,              
-            self.phone,              
-            self.user_image,             
-            self.notification_pref,             
-            self.preferred_location,             
-            self.password,             
-            self.id         
-        ))         
-        conn.commit()         
+        if not self.id:
+            raise ValueError("Owner must have an ID to update.")
+        cursor = conn.cursor()
+        cursor.execute(
+            '''
+            UPDATE users 
+            SET name = ?, phone = ?, user_image = ?, notification_pref = ?, preferred_location = ?, user_pass = ?, security_question = ?, security_answer = ?
+            WHERE id = ?
+            ''',
+            (self.name, self.phone, self.user_image, self.notification_pref, self.preferred_location, self.password, self.security_question, self.security_answer, self.id)
+        )
+        conn.commit()
         return True
 
     
@@ -318,7 +340,7 @@ class CottageTable:
     
     def update_in_db(self, conn):
         conn.execute(
-            'UPDATE cottage_tables SET table_no = ?, capacity = ?, table_image = ?,price=? status = ? WHERE id = ?',
+            'UPDATE cottage_tables SET table_no = ?, capacity = ?, table_image = ?, price = ?, status = ? WHERE id = ?',
             (self.table_no, self.capacity, self.table_image, self.price, self.status, self.id)
         )
         return self
@@ -604,6 +626,49 @@ class Reservation:
             cottage_status=row['cottage_status'],
             date_reserved=row['date_reserved']
         ) for row in reservation_rows]
+    @classmethod
+    def auto_decline_expired_reservations(cls, conn):
+        """
+        Automatically decline reservations that have expired (date_stay has passed)
+        Returns the number of reservations that were declined
+        """
+        cursor = conn.cursor()
+        now = datetime.now()
+        today = now.date()
+        current_time = now.time()
+        affected_rows = 0
+
+        # Decline all pending reservations with date_stay < today
+        cursor.execute('''
+            UPDATE reservations 
+            SET cottage_status = 'declined'
+            WHERE date_stay < ?
+            AND cottage_status = 'pending'
+        ''', (today.strftime('%Y-%m-%d'),))
+        affected_rows += cursor.rowcount
+
+        # For today's reservations, decline if start_time has passed
+        cursor.execute('''
+            SELECT id, start_time FROM reservations
+            WHERE date_stay = ?
+            AND cottage_status = 'pending'
+        ''', (today.strftime('%Y-%m-%d'),))
+
+        for row in cursor.fetchall():
+            try:
+                start_time_obj = datetime.strptime(row['start_time'], '%I:%M %p').time()
+                if current_time > start_time_obj:
+                    cursor.execute('''
+                        UPDATE reservations
+                        SET cottage_status = 'declined'
+                        WHERE id = ?
+                    ''', (row['id'],))
+                    affected_rows += cursor.rowcount
+            except Exception as e:
+                print(f"Error parsing start_time for reservation {row['id']}: {e}")
+
+        conn.commit()
+        return affected_rows
     
     @classmethod
     def find_conflicting_reservations(cls, conn, cottage_id, date_stay, start_time, end_time):
@@ -897,7 +962,7 @@ class Notification:
             (notification_id, user_id)         
         )         
         conn.commit()
-        return cursor.rowcount > 0
+        return cursor.rowcount
     
     @staticmethod     
     def delete_all_notifications(conn, user_id):         

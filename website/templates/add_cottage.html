@@ -3,115 +3,163 @@
 {% block title %}Add New Cottage - Balugan Cottage{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Add New Cottage</h1>
+<div class="min-h-screen bg-gray-50">
+    <!-- Header Section -->
+    <div class="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-[1920px] mx-auto px-6 py-4">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+                <div class="space-y-1">
+                    <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Add New Cottage</h1>
+                    <p class="text-sm text-gray-500">Create a new cottage listing for your resort</p>
+                </div>
+                <a href="{{ url_for('cottages.my_cottages') }}" 
+                   class="inline-flex items-center px-4 py-2 bg-gray-600 hover:bg-black text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to My Cottages
+                </a>
+            </div>
+        </div>
+    </div>
 
+    <!-- Flash Messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        {% for category, message in messages %}
-        <div class="mb-6 p-4 rounded-md {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}" id="flash-msg">
-            {{ message }}
+        <div class="max-w-[1920px] mx-auto px-6 mt-4">
+            {% for category, message in messages %}
+            <div class="rounded-lg p-4 mb-4 transform transition-all duration-300 {% if category == 'error' %}bg-red-50 text-red-700 border border-red-200{% elif category == 'warning' %}bg-yellow-50 text-yellow-700 border border-yellow-200{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}" id="flash-msg">
+                <div class="flex items-center">
+                    {% if category == 'error' %}
+                        <i class="fas fa-exclamation-circle mr-3 text-red-500"></i>
+                    {% elif category == 'warning' %}
+                        <i class="fas fa-exclamation-triangle mr-3 text-yellow-500"></i>
+                    {% else %}
+                        <i class="fas fa-check-circle mr-3 text-green-500"></i>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-        
         <script>
             setTimeout(function() {
                 const flashMsg = document.getElementById("flash-msg");
                 if (flashMsg) {
-                    flashMsg.remove();
+                    flashMsg.style.opacity = '0';
+                    flashMsg.style.transform = 'translateY(-10px)';
+                    setTimeout(() => flashMsg.remove(), 300);
                 }
             }, 5000);
         </script>
     {% endif %}
     {% endwith %}
-    
-    <div class="bg-white rounded-lg shadow-md p-6 border-2 border-gray-200">
-        <form action="{{ url_for('cottages.add_cottage') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Cottage Number -->
-                <div>
-                    <label for="cottage_no" class="block text-gray-700 font-medium mb-2">Cottage Number *</label>
-                    <input type="text" id="cottage_no" name="cottage_no" required 
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-                
-                <!-- Flag Color -->
-                <div>
-                    <label for="flag_color" class="block text-gray-700 font-medium mb-2">Flag Color *</label>
-                    <select id="flag_color" name="flag_color" required 
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        onchange="toggleColorInput()">
-                        <option value="">Select Flag Color</option>
-                        <option value="Blue">Blue</option>
-                        <option value="Green">Green</option>
-                        <option value="Red">Red</option>
-                        <option value="Yellow">Yellow</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-                
-                <!-- New Color (shows only when "Other" is selected) -->
-                <div id="other_color_div" class="hidden">
-                    <label for="new_color" class="block text-gray-700 font-medium mb-2">Specify Flag Color *</label>
-                    <input type="text" id="new_color" name="new_color" 
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+
+    <!-- Main Content -->
+    <div class="max-w-[1920px] mx-auto px-6 py-6">
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+            <form action="{{ url_for('cottages.add_cottage') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <!-- Basic Information Section -->
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Basic Information</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <!-- Cottage Number -->
+                        <div class="space-y-2">
+                            <label for="cottage_no" class="block text-sm font-medium text-gray-700">Cottage Number *</label>
+                            <input type="text" id="cottage_no" name="cottage_no" required 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                placeholder="Enter cottage number">
+                        </div>
+                        
+                        <!-- Flag Color -->
+                        <div class="space-y-2">
+                            <label for="flag_color" class="block text-sm font-medium text-gray-700">Flag Color *</label>
+                            <select id="flag_color" name="flag_color" required 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                onchange="toggleColorInput()">
+                                <option value="">Select Flag Color</option>
+                                <option value="Blue">Blue</option>
+                                <option value="Green">Green</option>
+                                <option value="Red">Red</option>
+                                <option value="Yellow">Yellow</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- New Color (shows only when "Other" is selected) -->
+                        <div id="other_color_div" class="hidden space-y-2">
+                            <label for="new_color" class="block text-sm font-medium text-gray-700">Specify Color *</label>
+                            <input type="text" id="new_color" name="new_color" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                placeholder="Enter custom color">
+                        </div>
+                        
+                        <!-- Cottage Location -->
+                        <div class="space-y-2">
+                            <label for="cottage_location" class="block text-sm font-medium text-gray-700">Cottage Location</label>
+                            <input type="text" id="cottage_location" name="cottage_location" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                                placeholder="Enter cottage location">
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Cottage Location -->
-                <div>
-                    <label for="cottage_location" class="block text-gray-700 font-medium mb-2">Cottage Location</label>
-                    <input type="text" id="cottage_location" name="cottage_location" 
-                        class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="e.g., Beachfront, Pool side, etc.">
+                <!-- Image Upload Section -->
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Cottage Image</h2>
+                    <div class="space-y-2">
+                        <div class="relative flex items-center space-x-4">
+                            <input type="file" id="cottage_image" name="cottage_image" accept="image/*" 
+                                   class="hidden" onchange="handleImageUpload(this)">
+                            <button type="button" onclick="document.getElementById('cottage_image').click()" 
+                                    class="flex items-center justify-center w-12 h-12 bg-blue-600 hover:bg-black text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow">
+                                <i class="fas fa-plus text-lg"></i>
+                            </button>
+                            <div class="flex-1">
+                                <span id="cottage_image_filename" class="text-gray-600 text-sm"></span>
+                                <p class="text-sm text-gray-500 mt-1">Upload an image of the cottage (PNG, JPG, JPEG, GIF)</p>
+                            </div>
+                        </div>
+                        <div id="image_preview" class="hidden mt-4">
+                            <img id="preview_img" src="" alt="Preview" class="max-h-48 rounded-lg shadow-sm">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Cottage Image -->
-            <div>
-                <label for="cottage_image" class="block text-gray-700 font-medium mb-2">Cottage Image</label>
-                <input type="file" id="cottage_image" name="cottage_image" accept="image/*" 
-                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                <p class="text-sm text-gray-500 mt-1">Upload an image of the cottage (PNG, JPG, JPEG, GIF)</p>
-            </div>
-            
-            <!-- Cottage Description -->
-            <div>
-                <label for="cottage_description" class="block text-gray-700 font-medium mb-2">Cottage Description</label>
-                <textarea id="cottage_description" name="cottage_description" rows="4"
-                    class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Describe the cottage features, amenities, etc."></textarea>
-            </div>
-            
-            <!-- Tables Section -->
-            <div class="border-t border-gray-200 pt-6">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Tables</h3>
-                <p class="text-gray-600 mb-4">Add tables to this cottage (optional)</p>
-                
-                <div id="new-tables-container" class="space-y-4">
-                    <!-- Tables will be added here dynamically -->
+
+                <!-- Description Section -->
+                <div class="space-y-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Description</h2>
+                    <div class="space-y-2">
+                        <textarea id="cottage_description" name="cottage_description" rows="4"
+                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                            placeholder="Describe the cottage features, amenities, etc."></textarea>
+                    </div>
                 </div>
-                
-                <input type="hidden" id="new_table_count" name="new_table_count" value="0">
-                
-                <div class="mt-4">
-                    <button type="button" id="add-new-table-btn" 
-                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <i class="fas fa-plus mr-2"></i> Add Table
+
+                <!-- Tables Section -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-xl font-semibold text-gray-900">Tables</h2>
+                        <button type="button" id="add-new-table-btn" 
+                                class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-black text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow">
+                            <i class="fas fa-plus mr-2"></i> Add New Table
+                        </button>
+                    </div>
+                    
+                    <div id="new-tables-container" class="space-y-4"></div>
+                    <input type="hidden" id="new_table_count" name="new_table_count" value="0">
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                    <a href="{{ url_for('cottages.my_cottages') }}" 
+                       class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow">
+                        Cancel
+                    </a>
+                    <button type="submit" 
+                            class="px-6 py-2.5 bg-blue-600 hover:bg-black text-white rounded-lg transition-all duration-200 shadow-sm hover:shadow">
+                        Add Cottage
                     </button>
                 </div>
-            </div>
-            
-            <div class="flex justify-between pt-6 border-t border-gray-200">
-                <a href="{{ url_for('cottages.my_cottages') }}" 
-                    class="bg-gray-600 hover:bg-black text-white px-6 py-2 rounded-lg transition duration-300">
-                    Cancel
-                </a>
-                <button type="submit" class="bg-green-600 hover:bg-black text-white px-6 py-2 rounded-lg transition duration-300">
-                    Save Cottage
-                </button>
-            </div>  
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -123,8 +171,32 @@
         
         if (flagColor === 'Other') {
             otherColorDiv.classList.remove('hidden');
+            otherColorDiv.classList.add('animate-fadeIn');
         } else {
             otherColorDiv.classList.add('hidden');
+            otherColorDiv.classList.remove('animate-fadeIn');
+        }
+    }
+
+    // Handle image upload and preview
+    function handleImageUpload(input) {
+        const filename = input.files[0]?.name || '';
+        document.getElementById('cottage_image_filename').textContent = filename;
+        
+        const preview = document.getElementById('image_preview');
+        const previewImg = document.getElementById('preview_img');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImg.src = e.target.result;
+                preview.classList.remove('hidden');
+                preview.classList.add('animate-fadeIn');
+            }
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.classList.add('hidden');
+            preview.classList.remove('animate-fadeIn');
         }
     }
     
@@ -141,31 +213,48 @@
             newTableCountInput.value = newTableCount;
             
             const newTableRow = document.createElement('div');
-            newTableRow.className = 'new-table-row grid grid-cols-1 md:grid-cols-4 gap-4 items-center mb-4 pb-4 border-b';
+            newTableRow.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200 transform transition-all duration-300 animate-fadeIn';
             newTableRow.id = `new-table-row-${newTableCount-1}`;
             
             newTableRow.innerHTML = `
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">Table Number *</label>
-                    <input type="text" name="new_table_no_${newTableCount-1}" class="w-full px-4 py-2 border rounded-lg" required>
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">Capacity (Persons) *</label>
-                    <input type="number" name="new_table_capacity_${newTableCount-1}" class="w-full px-4 py-2 border rounded-lg" required min="1">
-                </div>
-                
-                <div>
-                    <label class="block text-gray-700 font-medium mb-2">Table Image</label>
-                    <input type="file" name="new_table_image_${newTableCount-1}" class="w-full px-4 py-2 border rounded-lg" accept="image/*">
-                    <p class="text-sm text-gray-500 mt-1">Upload an image of the table (optional)</p>
-                </div>
-                
-                <div class="flex items-end">
-                    <button type="button" class="remove-new-table-btn bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg" 
-                            data-index="${newTableCount-1}">
-                        Remove
-                    </button>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Table Number *</label>
+                        <input type="text" name="new_table_no_${newTableCount-1}" 
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                               required placeholder="Enter table number">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Capacity (Persons) *</label>
+                        <input type="number" name="new_table_capacity_${newTableCount-1}" 
+                               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                               required min="1" placeholder="Enter capacity">
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Table Image</label>
+                        <div class="relative flex items-center space-x-3">
+                            <input type="file" name="new_table_image_${newTableCount-1}" 
+                                   id="new_table_image_${newTableCount-1}" class="hidden" accept="image/*" 
+                                   onchange="handleTableImageUpload(this, ${newTableCount-1})">
+                            <button type="button" onclick="document.getElementById('new_table_image_${newTableCount-1}').click()" 
+                                    class="flex items-center justify-center w-10 h-10 bg-blue-600 hover:bg-black text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 shadow-sm hover:shadow">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <span id="new_table_image_filename_${newTableCount-1}" class="text-gray-600 text-sm"></span>
+                        </div>
+                        <div id="table_image_preview_${newTableCount-1}" class="hidden mt-2">
+                            <img src="" alt="Table Preview" class="max-h-24 rounded-lg shadow-sm">
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button type="button" class="remove-new-table-btn px-4 py-2.5 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-all duration-200 shadow-sm hover:shadow" 
+                                data-index="${newTableCount-1}">
+                            <i class="fas fa-trash-alt mr-2"></i> Remove
+                        </button>
+                    </div>
                 </div>
             `;
             
@@ -177,10 +266,34 @@
                 const index = this.getAttribute('data-index');
                 const rowToRemove = document.getElementById(`new-table-row-${index}`);
                 if (rowToRemove) {
-                    rowToRemove.remove();
+                    rowToRemove.style.opacity = '0';
+                    rowToRemove.style.transform = 'translateY(-10px)';
+                    setTimeout(() => rowToRemove.remove(), 300);
                 }
             });
         });
+
+        // Handle table image upload and preview
+        window.handleTableImageUpload = function(input, index) {
+            const filename = input.files[0]?.name || '';
+            document.getElementById(`new_table_image_filename_${index}`).textContent = filename;
+            
+            const preview = document.getElementById(`table_image_preview_${index}`);
+            const previewImg = preview.querySelector('img');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.classList.remove('hidden');
+                    preview.classList.add('animate-fadeIn');
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.classList.add('hidden');
+                preview.classList.remove('animate-fadeIn');
+            }
+        };
         
         // Form submission validation
         document.querySelector('form').addEventListener('submit', function(event) {
@@ -194,9 +307,20 @@
                     return;
                 }
             }
-            
-            // We don't need additional validation here as we're using the required attribute on inputs
         });
     });
+
+    // Add fade-in animation
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 {% endblock %}

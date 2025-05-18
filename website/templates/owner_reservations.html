@@ -39,12 +39,13 @@
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
-                        </thead>
+                        </thead>                                    
                         <tbody class="bg-white divide-y divide-gray-200">
                             {% for res in pending_reservations %}
-                            <tr>
+                            <tr class="{% if res.date_stay < now %}bg-red-50{% endif %}">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="flex items-center">
                                         <div class="h-10 w-10 flex-shrink-0 mr-3">
@@ -74,7 +75,9 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900">{{ res.date_stay }}</div>
-                                    {% if res.date_stay == now %}
+                                    {% if res.date_stay < now %}
+                                    <div class="text-xs font-medium text-red-600">Expired</div>
+                                    {% elif res.date_stay == now %}
                                     <div class="text-xs font-medium text-red-600">Today</div>
                                     {% elif res.date_stay == tomorrow %}
                                     <div class="text-xs font-medium text-orange-600">Tomorrow</div>
@@ -86,7 +89,19 @@
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900">₱{{ res.amount }}</div>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    {% if res.date_stay < now %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                        Expired
+                                    </span>
+                                    {% else %}
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                        Pending
+                                    </span>
+                                    {% endif %}
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    {% if res.date_stay >= now %}
                                     <div class="flex justify-end space-x-2">
                                         <form action="{{ url_for('reservation.approve_reservation', reservation_id=res.id) }}" method="POST" class="inline">
                                             <button type="submit" class="text-green-600 hover:text-green-900 bg-green-100 hover:bg-green-200 px-3 py-1 rounded transition">
@@ -99,6 +114,9 @@
                                             </button>
                                         </form>
                                     </div>
+                                    {% else %}
+                                    <span class="text-red-600 text-sm">Auto-declined</span>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
@@ -255,7 +273,11 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                                        {{ res.cottage_status|capitalize }}
+                                        {% if res.cottage_status in ['paid_online', 'pay_onsite', 'approved'] %}
+                                            Reserve
+                                        {% else %}
+                                            {{ res.cottage_status|capitalize }}
+                                        {% endif %}
                                     </span>
                                 </td>
                             </tr>
@@ -267,15 +289,7 @@
             </section>
             
             <!-- Calendar Link Section -->
-            <div class="text-center mt-8">
-                <a href="{{ url_for('reservation.cottage_availability_calendar') }}" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    View Calendar
-                </a>
-            </div>
-        </div>
+            
     </div>
     
     <script>

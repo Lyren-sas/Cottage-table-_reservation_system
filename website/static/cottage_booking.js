@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const tableCard = document.createElement('div');
                         const isAvailable = table.cottage_status === 'available';
                         const statusColor = isAvailable ? 'green' : (table.cottage_status === 'pending' ? 'yellow' : 'red');
-                        const statusText = table.cottage_status.charAt(0).toUpperCase() + table.cottage_status.slice(1);
+                        const statusText = (['paid_online', 'pay_onsite', 'approved'].includes(table.cottage_status)) ? 'Reserve' : (table.cottage_status.charAt(0).toUpperCase() + table.cottage_status.slice(1));
                         
                         tableCard.className = `border rounded-lg overflow-hidden ${!isAvailable ? 'opacity-50' : 'cursor-pointer hover:border-blue-500 hover:shadow-md transition duration-200'}`;
                         tableCard.innerHTML = `
@@ -213,6 +213,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const selectedTimeInfo = document.getElementById('selectedTimeInfo');
         const selectedPersonsInfo = document.getElementById('selectedPersonsInfo');
         const tableCapacity = tableElement.getAttribute('data-table-capacity');
+        const modal = document.getElementById('reservationModal');
+        const modalContent = document.getElementById('modalContent');
         
         // Get form values
         const dateStay = document.getElementById('date_stay').value || getTodayDate();
@@ -234,8 +236,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show current total
         updateTotalAmount();
         
-        // Show modal
+        // Show modal with animation
         modal.classList.remove('hidden');
+        // Trigger reflow to ensure animation works
+        modal.offsetHeight;
+        modal.classList.add('show');
+        modalContent.classList.add('show');
     }
     
     // Add event listener to max_persons to reload tables when it changes
@@ -317,10 +323,138 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     };
     
-    // Update end time minimum value based on start time
+    // Function to validate time input
+    function validateTimeInput(startTime, endTime) {
+        const currentDate = new Date();
+        const currentTime = currentDate.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+        const selectedDate = document.getElementById('date_stay').value;
+        
+        // Convert selected date to Date object
+        const selectedDateObj = new Date(selectedDate);
+        const isToday = selectedDateObj.toDateString() === currentDate.toDateString();
+        
+        // Convert times to 24-hour format for comparison
+        const startTime24 = convertTo24Hour(startTime);
+        const endTime24 = convertTo24Hour(endTime);
+        
+        if (isToday) {
+            if (startTime24 < currentTime) {
+                return {
+                    valid: false,
+                    message: `Cannot book a time slot that has already passed. Current time is ${formatTimeForDisplay(currentTime)}`
+                };
+            }
+        }
+        
+        // Validate end time is after start time
+        if (endTime24 <= startTime24) {
+            return {
+                valid: false,
+                message: 'End time must be after start time'
+            };
+        }
+        
+        return { valid: true };
+    }
+
+    // Helper function to format time for display (12-hour format)
+    function formatTimeForDisplay(time24) {
+        if (!time24) return '';
+        
+        const [hours, minutes] = time24.split(':');
+        const hour = parseInt(hours, 10);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const formattedHour = hour % 12 || 12;
+        
+        return `${formattedHour}:${minutes} ${ampm}`;
+    }
+
+    // Helper function to convert time to 24-hour format
+    function convertTo24Hour(time) {
+        if (!time) return '';
+        
+        // If already in 24-hour format
+        if (!time.includes('AM') && !time.includes('PM')) {
+            return time;
+        }
+        
+        const [timePart, period] = time.split(' ');
+        let [hours, minutes] = timePart.split(':');
+        
+        hours = parseInt(hours);
+        if (period === 'PM' && hours !== 12) {
+            hours += 12;
+        } else if (period === 'AM' && hours === 12) {
+            hours = 0;
+        }
+        
+        return `${hours.toString().padStart(2, '0')}:${minutes}`;
+    }
+
+    // Update the checkTimeAvailability function
+    window.checkTimeAvailability = function() {
+        const cottageId = document.getElementById('cottage_id').value;
+        const dateStay = document.getElementById('date_stay').value || getTodayDate();
+        const startTime = document.getElementById('start_time').value;
+        const endTime = document.getElementById('end_time').value;
+        const availabilityUrl = bookingForm.getAttribute('data-availability-url');
+        
+        if (!cottageId || !startTime || !endTime) return;
+        
+        // First validate the time input
+        const timeValidation = validateTimeInput(startTime, endTime);
+        if (!timeValidation.valid) {
+            const messageEl = document.getElementById('time_availability_message');
+            messageEl.textContent = timeValidation.message;
+            messageEl.className = "mt-2 text-sm text-red-600";
+            messageEl.classList.remove('hidden');
+            return;
+        }
+        
+        fetch(`${availabilityUrl}?cottage_id=${cottageId}&date=${dateStay}&start_time=${startTime}&end_time=${endTime}`)
+            .then(response => response.json())
+            .then(data => {
+                const messageEl = document.getElementById('time_availability_message');
+                
+                if (data.success) {
+                    if (data.available) {
+                        messageEl.textContent = "Time slot available!";
+                        messageEl.className = "mt-2 text-sm text-green-600";
+                    } else {
+                        messageEl.textContent = data.message || "This time slot conflicts with an existing reservation.";
+                        messageEl.className = "mt-2 text-sm text-red-600";
+                    }
+                    messageEl.classList.remove('hidden');
+                } else {
+                    messageEl.textContent = data.message;
+                    messageEl.className = "mt-2 text-sm text-red-600";
+                    messageEl.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error("Error checking time availability:", error);
+                const messageEl = document.getElementById('time_availability_message');
+                messageEl.textContent = "Error checking availability. Please try again.";
+                messageEl.className = "mt-2 text-sm text-red-600";
+                messageEl.classList.remove('hidden');
+            });
+    };
+
+    // Update the updateEndTimeMin function
     window.updateEndTimeMin = function() {
         const startTime = document.getElementById('start_time').value;
         const endTimeInput = document.getElementById('end_time');
+        
+        // Validate start time first
+        const timeValidation = validateTimeInput(startTime, endTimeInput.value);
+        if (!timeValidation.valid) {
+            const messageEl = document.getElementById('time_availability_message');
+            messageEl.textContent = timeValidation.message;
+            messageEl.className = "mt-2 text-sm text-red-600";
+            messageEl.classList.remove('hidden');
+            return;
+        }
+        
         endTimeInput.min = startTime;
         
         // If end time is now less than start time, update it
@@ -337,44 +471,29 @@ document.addEventListener('DOMContentLoaded', function() {
         checkTimeAvailability();
     };
     
-    // Check time availability
-    window.checkTimeAvailability = function() {
-        const cottageId = document.getElementById('cottage_id').value;
-        const dateStay = document.getElementById('date_stay').value || getTodayDate();
-        const startTime = document.getElementById('start_time').value;
-        const endTime = document.getElementById('end_time').value;
-        const availabilityUrl = bookingForm.getAttribute('data-availability-url');
-        
-        if (!cottageId || !startTime || !endTime) return;
-        
-        fetch(`${availabilityUrl}?cottage_id=${cottageId}&date=${dateStay}&start_time=${startTime}&end_time=${endTime}`)
-            .then(response => response.json())
-            .then(data => {
-                const messageEl = document.getElementById('time_availability_message');
-                
-                if (data.success) {
-                    if (data.available) {
-                        messageEl.textContent = "Time slot available!";
-                        messageEl.className = "mt-2 text-sm text-green-600";
-                    } else {
-                        messageEl.textContent = "This time slot conflicts with an existing reservation.";
-                        messageEl.className = "mt-2 text-sm text-red-600";
-                    }
-                    messageEl.classList.remove('hidden');
-                }
-            })
-            .catch(error => {
-                console.error("Error checking time availability:", error);
-            });
-    };
-    
     // Close modal event handlers
     document.getElementById('closeModal').addEventListener('click', () => {
-        modal.classList.add('hidden');
+        const modal = document.getElementById('reservationModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalContent.classList.remove('show');
+        modal.classList.remove('show');
+        // Wait for animation to complete before hiding
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
     });
     
     document.getElementById('cancelButton').addEventListener('click', () => {
-        modal.classList.add('hidden');
+        const modal = document.getElementById('reservationModal');
+        const modalContent = document.getElementById('modalContent');
+        
+        modalContent.classList.remove('show');
+        modal.classList.remove('show');
+        // Wait for animation to complete before hiding
+        setTimeout(() => {
+            modal.classList.add('hidden');
+        }, 300);
     });
     
     // Confirm reservation
@@ -453,15 +572,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Handle clicking outside the modal to close
     window.addEventListener('click', (e) => {
+        const modal = document.getElementById('reservationModal');
+        const modalContent = document.getElementById('modalContent');
+        
         if (e.target === modal) {
-            modal.classList.add('hidden');
+            modalContent.classList.remove('show');
+            modal.classList.remove('show');
+            // Wait for animation to complete before hiding
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
     });
     
     // Escape key closes modal
     window.addEventListener('keydown', (e) => {
+        const modal = document.getElementById('reservationModal');
+        const modalContent = document.getElementById('modalContent');
+        
         if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
-            modal.classList.add('hidden');
+            modalContent.classList.remove('show');
+            modal.classList.remove('show');
+            // Wait for animation to complete before hiding
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
         }
     });
 
@@ -475,6 +610,98 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Redirect to the same page with date parameter
         window.location.href = window.location.pathname + "?date=" + checkDate;
+    };
+
+    // Load reviews when the page loads
+    loadReviews();
+
+    // Function to load reviews
+    function loadReviews() {
+        const reviewsContainer = document.getElementById('reviewsContainer');
+        const reviewsUrl = window.REVIEWS_URL;
+
+        if (!reviewsUrl) {
+            reviewsContainer.innerHTML = '<div class="text-center text-gray-500">No reviews available.</div>';
+            return;
+        }
+
+        fetch(reviewsUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.reviews) {
+                    if (data.reviews.length === 0) {
+                        reviewsContainer.innerHTML = '<div class="text-center text-gray-500">No reviews yet.</div>';
+                        return;
+                    }
+
+                    const reviewsHTML = data.reviews.map(review => {
+                        const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                        const reviewDate = new Date(review.date_created).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+
+                        return `
+                            <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300">
+                                <div class="flex items-start space-x-4">
+                                    <div class="flex-shrink-0">
+                                        ${review.user_image ? 
+                                            `<img src="data:image/jpeg;base64,${review.user_image}" 
+                                                  alt="${review.user_name}" 
+                                                  class="w-12 h-12 rounded-full object-cover border-2 border-gray-200">` :
+                                            `<div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
+                                                <span class="text-gray-600 font-bold text-lg">${review.user_name.charAt(0).toUpperCase()}</span>
+                                            </div>`
+                                        }
+                                    </div>
+                                    <div class="flex-grow">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="text-lg font-semibold text-gray-800">${review.user_name}</h3>
+                                            <span class="text-sm text-gray-500">${reviewDate}</span>
+                                        </div>
+                                        <div class="flex items-center mt-1">
+                                            <div class="text-yellow-400 text-lg">${stars}</div>
+                                            <span class="ml-2 text-sm text-gray-600">${review.rating}/5</span>
+                                        </div>
+                                        <p class="mt-2 text-gray-600">${review.comment}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    reviewsContainer.innerHTML = reviewsHTML;
+                } else {
+                    reviewsContainer.innerHTML = '<div class="text-center text-red-500">Error loading reviews.</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading reviews:', error);
+                reviewsContainer.innerHTML = '<div class="text-center text-red-500">Error loading reviews. Please try again later.</div>';
+            });
+    }
+
+    // Function to open image modal
+    window.openImageModal = function(imageSrc) {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center';
+        modal.innerHTML = `
+            <div class="relative max-w-4xl max-h-[90vh] mx-4">
+                <img src="${imageSrc}" alt="Review image" class="max-w-full max-h-[90vh] object-contain rounded-lg">
+                <button class="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors duration-300" onclick="this.parentElement.parentElement.remove()">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     };
 });
 

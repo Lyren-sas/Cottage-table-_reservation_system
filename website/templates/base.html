@@ -13,102 +13,525 @@
 
     <!-- Add Font Awesome for the eye icon -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* Enhanced base styles */
+        body {
+            background: linear-gradient(135deg, #f6f8fd 0%, #e9f0f7 100%);
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Enhanced navbar styling */
+        .navbar-transition {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced title styling */
+        .site-title {
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .site-title:hover {
+            transform: scale(1.05);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Enhanced nav links */
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 50%;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover {
+            color: #3b82f6;
+            transform: translateY(-1px);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Enhanced button styling */
+        .btn-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-hover::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.2),
+                transparent
+            );
+            transition: 0.5s;
+        }
+
+        .btn-hover:hover::before {
+            left: 100%;
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Enhanced modal styling */
+        .modal-enter {
+            animation: modalFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-exit {
+            animation: modalFadeOut 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        @keyframes modalFadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+        }
+
+        /* Enhanced input styling */
+        .input-focus {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            background: #f8fafc;
+        }
+
+        .input-focus:focus {
+            transform: translateY(-1px);
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            background: white;
+        }
+
+        /* Enhanced flash message styling */
+        .flash-message {
+            animation: slideIn 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%) translateX(-50%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) translateX(-50%);
+                opacity: 1;
+            }
+        }
+
+        /* Enhanced dropdown styling */
+        .dropdown-enter {
+            animation: dropdownFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-exit {
+            animation: dropdownFadeOut 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes dropdownFadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px) scale(0.95);
+            }
+        }
+
+        /* Enhanced profile image styling */
+        .profile-image {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .profile-image:hover {
+            transform: scale(1.1);
+            border-color: #3b82f6;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        /* Enhanced notification badge */
+        .notification-badge {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            }
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+            }
+        }
+
+        /* Mobile menu styles */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            padding: 80px 20px 20px;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+            display: block;
+        }
+
+        .mobile-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-menu li {
+            margin: 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu li:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-menu a {
+            display: block;
+            padding: 15px 0;
+            color: #1a1a1a;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .mobile-menu a:hover {
+            color: #3b82f6;
+            padding-left: 10px;
+        }
+
+        .mobile-menu-button {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-button span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background-color: #1a1a1a;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-button.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-button.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-button.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Responsive styles */
+        @media (max-width: 1536px) {
+            .logo-container img {
+                max-height: 250px;
+            }
+        }
+
+        @media (max-width: 1280px) {
+            .logo-container img {
+                max-height: 200px;
+            }
+            .nav-link {
+                font-size: 1.1rem !important;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .desktop-nav {
+                display: none !important;
+            }
+            .mobile-menu-button {
+                display: block !important;
+            }
+            .logo-container {
+                max-width: 200px;
+            }
+            .logo-container img {
+                max-height: 180px;
+            }
+            .nav-link {
+                font-size: 1rem !important;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo-container {
+                max-width: 150px;
+            }
+            .logo-container img {
+                max-height: 150px;
+            }
+            .mobile-menu-button {
+                top: 15px;
+                right: 15px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .logo-container {
+                max-width: 120px;
+            }
+            .logo-container img {
+                max-height: 120px;
+            }
+            .mobile-menu-button {
+                top: 10px;
+                right: 10px;
+            }
+            .mobile-menu {
+                max-width: 100%;
+            }
+        }
+
+        /* Hide logo and nav when mobile menu is active */
+        .mobile-menu.active ~ .logo-container,
+        .mobile-menu.active ~ .desktop-nav {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        /* Responsive container */
+        .container-responsive {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .container-responsive {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container-responsive {
+                padding: 0 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container-responsive {
+                padding: 0 2.5rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .container-responsive {
+                padding: 0 3rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-b from-blue-50 to-green-50 min-h-screen py-12">   
+<body class="bg-gradient-to-b from-white-50 to-white-50 min-h-screen py-12">   
     
-    <nav class="w-full h-[130px] fixed top-0 transition-colors duration-300 flex justify-between px-12 z-50 bg-white/50" id="navbar">
-        <div class="flex items-center absolute top-[20px] left-[30px] w-1/3">
-            <h1 class="text-yellow-400 text-4xl font-bold mt-4 w-full"
-                style="font-family: 'Dancing Script', cursive; 
-                       text-shadow: 2px 2px 3px rgb(0, 0, 0);
-                       letter-spacing: 2px;">
-              NORZAGARAY COTTAGE <br>RESERVATION
-            </h1>
+    <nav class="w-full h-[150px] fixed top-[-10px] transition-colors duration-300 flex justify-between px-12 z-50 bg-transparent navbar-transition" id="navbar">
+        <div class="flex items-center absolute top-[-70px] left-[30px] w-1/3">
+            <a href="/" class="block">
+                <img src="{{ url_for('static', filename='logo.png') }}" 
+                     alt="Norzagaray Cottage Reservation" 
+                     class="h-[300px] w-auto object-contain hover:scale-105 transition-transform duration-300 mix-blend-multiply">
+            </a>
         </div>
+        
     
-        <div class="flex items-center absolute right-[30px] top-[20px]">
+        <div class="flex items-center absolute right-[30px] top-[50px]">
             <ul class="flex space-x-8">
                 {% if user.is_authenticated and user.role == 'user' %}
-                    <li><a href="/" class="text-black hover:text-blue-600 text-2xl font-medium transition-colors duration-300">Home</a></li>
-                    <li><a href="/make-reservation" class="text-black hover:text-blue-600 text-2xl font-medium transition-colors duration-300">Book Now</a></li>
-                    <li><a href="/my-reservations" class="text-black hover:text-blue-600 text-2xl font-medium transition-colors duration-300">My Reservations</a></li>
+                    <li><a href="/" class="nav-link text-black hover:text-blue-600 text-2xl font-medium">Home</a></li>
+                    <li><a href="/make-reservation" class="nav-link text-black hover:text-blue-600 text-2xl font-medium">Book Now</a></li>
+                    <li><a href="/my-reservations" class="nav-link text-black hover:text-blue-600 text-2xl font-medium">My Reservations</a></li>
                     <li>
-                        <a href="{{ url_for('notifications.notifications') }}" class="relative inline-flex items-center">
-                            <svg class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ url_for('notifications.notifications') }}" class="relative inline-flex items-center btn-hover">
+                            <svg class="h-10 w-10 text-gray-600 hover:text-blue-600 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C8.67 6.165 8 7.388 8 9v5.159c0 .538-.214 1.055-.595 1.436L6 17h5m4 0v1a3 3 0 01-6 0v-1m6 0H9" />
                             </svg>
                             {% if unread_count > 0 %}
-                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full animate-pulse">{{ unread_count }}</span>
                             {% endif %}
                         </a>
                     </li>
     
-                    <!-- User Dropdown -->
+                    <!-- Enhanced User Dropdown -->
                     <li class="flex items-center ml-8 cursor-pointer">
                         <div class="relative">
-                            <div class="flex items-center cursor-pointer" onclick="toggleUserDropdown()">
+                            <div class="flex items-center cursor-pointer btn-hover" onclick="toggleUserDropdown()">
                                 {% if user.is_authenticated %}
-                                    {% if user_image %}
-                                        <img src="{{ url_for('views.user_image', user_id=user.id) }}" class="w-10 h-10 rounded-full object-cover mr-2" alt="{{ user.name }}">
+                                    {% if user.user_image %}
+                                        <img src="{{ url_for('views.user_image', user_id=user.id) }}" 
+                                             alt="{{ user.name }}" 
+                                             class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
                                     {% else %}
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
-                                            <span class="text-gray-600 font-bold text-2xl">{{ user.name[:1] }}</span>
+                                        <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
+                                            <span class="text-white font-bold text-lg">{{ user.name[0].upper() }}</span>
                                         </div>
                                     {% endif %}
                                 {% else %}
-                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
-                                        <span class="text-gray-600 font-bold text-2xl">G</span>
-                                    </div>
+                                    <img src="{{ url_for('static', filename='profile.png') }}" 
+                                         alt="Guest" 
+                                         class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
                                 {% endif %}
-                                <span class="text-black hover:text-blue-600 text-lg font-medium transition-colors duration-300">{{ user.name }}</span>
+                                <span class="nav-link text-black hover:text-blue-600 text-lg font-medium">
+                                    {{ user.name }}
+                                </span>
                             </div>
-                            <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-10">
-                                <a href="{{ url_for('auth.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="{{ url_for('auth.logout') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden dropdown-enter">
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Profile</a>
+                                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Logout</a>
                             </div>
                         </div>
                     </li>
     
                 {% elif user.is_authenticated and user.role == 'owner' %}
-                    <li><a href="/dashboard" class="text-black hover:text-blue-600 text-xl font-medium transition-colors duration-300">Dashboard</a></li>
-                    <li><a href="/my-cottages" class="text-black hover:text-blue-600 text-xl font-medium transition-colors duration-300">My Cottages</a></li>
-                    <li><a href="/owner-reservations" class="text-black hover:text-blue-600 text-xl font-medium transition-colors duration-300">Reservations</a></li>
+                    <li><a href="/dashboard" class="nav-link text-black hover:text-blue-600 text-xl font-medium">Dashboard</a></li>
+                    <li><a href="/my-cottages" class="nav-link text-black hover:text-blue-600 text-xl font-medium">My Cottages</a></li>
+                    <li><a href="/owner-reservations" class="nav-link text-black hover:text-blue-600 text-xl font-medium">Reservations</a></li>
     
                     <li>
-                        <a href="{{ url_for('owner.owner_notifications') }}" class="relative inline-flex items-center">
-                            <svg class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ url_for('owner.owner_notifications') }}" class="relative inline-flex items-center btn-hover">
+                            <svg class="h-10 w-10 text-gray-600 hover:text-blue-600 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C8.67 6.165 8 7.388 8 9v5.159c0 .538-.214 1.055-.595 1.436L6 17h5m4 0v1a3 3 0 01-6 0v-1m6 0H9" />
                             </svg>
                             {% if unread_count > 0 %}
-                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full animate-pulse">{{ unread_count }}</span>
                             {% endif %}
                         </a>
                     </li>
     
-                    <!-- Owner Dropdown -->
+                    <!-- Enhanced Owner Dropdown -->
                     <li class="flex items-center ml-8 cursor-pointer">
                         <div class="relative">
-                            <div class="flex items-center cursor-pointer" onclick="toggleOwnerDropdown()">
-                                {% if user.is_authenticated %}
-                                    {% if user.user_image %}
-                                        <img src="{{ url_for('owner_views.user_image', user_id=user.id) }}" alt="{{ user.name }}" class="w-10 h-10 rounded-full object-cover mr-2">
+                            <div class="relative">
+                                <div class="flex items-center cursor-pointer btn-hover" onclick="toggleUserDropdown()">
+                                    {% if user.is_authenticated %}
+                                        {% if user.user_image %}
+                                            <img src="{{ url_for('owner_views.user_image', user_id=user.id) }}" 
+                                                 alt="{{ user.name }}" 
+                                                 class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
+                                        {% else %}
+                                            <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
+                                                <span class="text-white font-bold text-lg">{{ user.name[0].upper() }}</span>
+                                            </div>
+                                        {% endif %}
                                     {% else %}
-                                        <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-2">
-                                            <span class="text-gray-600 font-bold text-2xl">{{ user.name[:1] }}</span>
-                                        </div>
+                                        <img src="{{ url_for('static', filename='profile.png') }}" 
+                                             alt="Guest" 
+                                             class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
                                     {% endif %}
-                                {% endif %}
-                                <span class="text-black hover:text-blue-600 text-lg font-medium transition-colors duration-300">{{ user.name }}</span>
-                            </div>
-                            <div id="ownerDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden">
-                                <a href="/profile" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">Profile</a>
-                                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                                    <span class="nav-link text-black hover:text-blue-600 text-lg font-medium">
+                                        {{ user.name }}
+                                    </span>
+                                </div>
+                                <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden dropdown-enter">
+                                    <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Profile</a>
+                                    <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Logout</a>
+                                </div>
                             </div>
                         </div>
                     </li>
     
                 {% else %}
-                    <li><a href="#" class="text-black hover:text-blue-600 text-[30px] font-bold transition-colors duration-300 font-sans" id="loginBtn">Sign In</a></li>
+                    <li><a href="#" class="nav-link text-black hover:text-blue-600 text-[30px] font-bold font-sans btn-hover" id="loginBtn">Sign In</a></li>
                     
                 {% endif %}
             </ul>
@@ -122,39 +545,39 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- login modal-->
+    <!-- Enhanced Login Modal -->
     <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-12 rounded-lg shadow-md w-[500px] border border-gray-300 relative">
-            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="closeLoginModal">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white p-8 rounded-lg shadow-md w-[400px] border border-gray-300 relative modal-enter">
+            <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 btn-hover" id="closeLoginModal">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Login</h2>
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
             <form method="POST" action="/login">
-                <div class="mb-6">
-                    <label for="login-email" class="block text-gray-700 text-lg font-bold mb-2">Email</label>
+                <div class="mb-4">
+                    <label for="login-email" class="block text-gray-700 text-base font-bold mb-2">Email</label>
                     <input 
                         type="email" 
                         id="login-email" 
                         name="email" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Enter your email"
                         required
                     />
                 </div>
-                <div class="mb-8 relative">
-                    <label for="login-password" class="block text-gray-700 text-lg font-bold mb-2">Password</label>
+                <div class="mb-6 relative">
+                    <label for="login-password" class="block text-gray-700 text-base font-bold mb-2">Password</label>
                     <div class="relative">
                         <input 
                             type="password" 
                             id="login-password" 
                             name="password" 
-                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                             placeholder="Enter your password"
                             required
                         />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" id="login-toggle-password">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer btn-hover" id="login-toggle-password">
                             <i class="fas fa-eye text-gray-500 hover:text-gray-700"></i>
                         </span>
                     </div>
@@ -162,118 +585,196 @@
                 <div>
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300"
+                        class="w-full bg-blue-600 text-white py-2 px-4 text-base rounded-md hover:bg-blue-700 transition duration-300 btn-hover"
                     >
                         Login
                     </button>
                 </div>
             </form>
-            <div class="mt-6 text-center">
-                <p class="text-gray-600 text-lg">
+            <div class="mt-4 text-center">
+                <p class="text-gray-600 text-sm">
+                    <a href="#" class="text-blue-600 hover:underline font-medium btn-hover" id="forgotPasswordLink">Forgot Password?</a>
+                </p>
+                <p class="text-gray-600 text-sm mt-2">
                     Don't have an account? 
-                    <a href="#" class="text-blue-600 hover:underline font-medium" id="switchToSignup">Sign up</a>
+                    <a href="#" class="text-blue-600 hover:underline font-medium btn-hover" id="switchToSignup">Sign up</a>
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Signup Modal -->
-    <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-12 rounded-lg shadow-md w-[550px] border border-gray-300 relative">
-            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="closeSignupModal">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden" 
+         data-show-modal="{% if show_signup_modal %}true{% else %}false{% endif %}">
+        <div class="bg-white p-8 rounded-lg shadow-md w-[500px] border border-gray-300 relative modal-enter">
+            <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 btn-hover" id="closeSignupModal">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Create Account</h2>
-            <form method="POST" action="/signup">
-                <div class="mb-5">
-                    <label for="signup-email" class="block text-gray-700 text-lg font-bold mb-2">Email</label>
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Create Account</h2>
+            
+            {% if signup_error %}
+            <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <p class="text-sm text-red-600">{{ signup_error }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="POST" action="/signup" id="signupForm">
+                <div class="mb-3">
+                    <label for="signup-email" class="block text-gray-700 text-base font-bold mb-1">Email</label>
                     <input 
                         type="email" 
                         id="signup-email" 
                         name="email" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border {% if signup_error and 'email' in signup_error %}border-red-500{% else %}border-gray-300{% endif %} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Enter your email"
+                        value="{{ signup_data.email if signup_data else '' }}"
                         required
                     />
                 </div>
-                <div class="mb-5">
-                    <label for="signup-name" class="block text-gray-700 text-lg font-bold mb-2">Full Name</label>
+                <div class="mb-3">
+                    <label for="signup-name" class="block text-gray-700 text-base font-bold mb-1">Full Name</label>
                     <input 
                         type="text" 
                         id="signup-name" 
                         name="name" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border {% if signup_error and 'name' in signup_error %}border-red-500{% else %}border-gray-300{% endif %} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Enter your full name"
+                        value="{{ signup_data.name if signup_data else '' }}"
                         required
                     />
                 </div>
-                <div class="mb-5">
-                    <label for="signup-username" class="block text-gray-700 text-lg font-bold mb-2">Username</label>
+                <div class="mb-3">
+                    <label for="signup-username" class="block text-gray-700 text-base font-bold mb-1">Username</label>
                     <input 
                         type="text" 
                         id="signup-username" 
                         name="username" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border {% if signup_error and 'username' in signup_error %}border-red-500{% else %}border-gray-300{% endif %} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Choose a username"
+                        value="{{ signup_data.username if signup_data else '' }}"
                         required
                     />
                 </div>
-                <div class="mb-5 relative">
-                    <label for="signup-password1" class="block text-gray-700 text-lg font-bold mb-2">Password</label>
+                <div class="mb-3 relative">
+                    <label for="signup-password1" class="block text-gray-700 text-base font-bold mb-1">Password</label>
                     <div class="relative">
                         <input 
                             type="password" 
                             id="signup-password1" 
                             name="password1" 
-                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 text-base border {% if signup_error and 'password' in signup_error %}border-red-500{% else %}border-gray-300{% endif %} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                             placeholder="Create a password"
                             required
                         />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" id="signup-toggle-password1">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer btn-hover" id="signup-toggle-password1">
                             <i class="fas fa-eye text-gray-500 hover:text-gray-700"></i>
                         </span>
                     </div>
                 </div>
-                <div class="mb-8 relative">
-                    <label for="signup-password2" class="block text-gray-700 text-lg font-bold mb-2">Confirm Password</label>
+                <div class="mb-4 relative">
+                    <label for="signup-password2" class="block text-gray-700 text-base font-bold mb-1">Confirm Password</label>
                     <div class="relative">
                         <input 
                             type="password" 
                             id="signup-password2" 
                             name="password2" 
-                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 text-base border {% if signup_error and 'password' in signup_error %}border-red-500{% else %}border-gray-300{% endif %} rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                             placeholder="Confirm your password"
                             required
                         />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" id="signup-toggle-password2">
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer btn-hover" id="signup-toggle-password2">
                             <i class="fas fa-eye text-gray-500 hover:text-gray-700"></i>
                         </span>
                     </div>
                 </div>
+                <div class="mb-3">
+                    <label for="security-question" class="block text-gray-700 text-base font-bold mb-1">Security Question</label>
+                    <select id="security-question" name="security_question" class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" required>
+                        <option value="">Select a question</option>
+                        <option value="mother_maiden" {% if signup_data and signup_data.security_question == 'mother_maiden' %}selected{% endif %}>What is your mother's maiden name?</option>
+                        <option value="first_pet" {% if signup_data and signup_data.security_question == 'first_pet' %}selected{% endif %}>What was your first pet's name?</option>
+                        <option value="birth_city" {% if signup_data and signup_data.security_question == 'birth_city' %}selected{% endif %}>In what city were you born?</option>
+                        <option value="favorite_teacher" {% if signup_data and signup_data.security_question == 'favorite_teacher' %}selected{% endif %}>Who was your favorite teacher?</option>
+                    </select>
+                </div>
+                <div class="mb-5">
+                    <label for="security-answer" class="block text-gray-700 text-base font-bold mb-1">Answer</label>
+                    <input 
+                        type="text" 
+                        id="security-answer" 
+                        name="security_answer" 
+                        class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" 
+                        placeholder="Enter your answer" 
+                        value="{{ signup_data.security_answer if signup_data else '' }}"
+                        required 
+                    />
+                </div>
                 <div>
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300"
+                        class="w-full bg-blue-600 text-white py-2 px-4 text-base rounded-md hover:bg-blue-700 transition duration-300 btn-hover"
                     >
                         Sign Up
                     </button>
                 </div>
             </form>
-            <div class="mt-6 text-center">
-                <p class="text-gray-600 text-lg">
+            <div class="mt-4 text-center">
+                <p class="text-gray-600 text-sm">
                     Already have an account? 
-                    <a href="#" class="text-blue-600 hover:underline font-medium" id="switchToLogin">Login</a>
+                    <a href="#" class="text-blue-600 hover:underline font-medium btn-hover" id="switchToLogin">Login</a>
                 </p>
             </div>
         </div>
     </div>
 
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-10 rounded-lg shadow-md w-[500px] border border-gray-300 relative modal-enter">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 btn-hover" id="closeForgotPasswordModal">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Forgot Password</h2>
+            <form method="POST" action="/forgot_password" id="forgotPasswordForm">
+                <div class="mb-4">
+                    <label for="forgot-email" class="block text-gray-700 text-lg font-bold mb-2">Email</label>
+                    <input type="email" id="forgot-email" name="email" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter your email" required />
+                </div>
+                <div class="mb-4 flex items-center">
+                    <button type="button" id="findQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 btn-hover">Find Question</button>
+                </div>
+                <div class="mb-4" id="security-question-group" style="display:none;">
+                    <label for="forgot-security-question" class="block text-gray-700 text-lg font-bold mb-2">Security Question</label>
+                    <input type="text" id="forgot-security-question" name="security_question" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md bg-gray-100" readonly />
+                </div>
+                <div class="mb-4" id="security-answer-group" style="display:none;">
+                    <label for="forgot-security-answer" class="block text-gray-700 text-lg font-bold mb-2">Answer</label>
+                    <input type="text" id="forgot-security-answer" name="security_answer" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter your answer" required />
+                </div>
+                <div class="mb-6" id="new-password-group" style="display:none;">
+                    <label for="new-password" class="block text-gray-700 text-lg font-bold mb-2">New Password</label>
+                    <input type="password" id="new-password" name="new_password" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter new password" required />
+                </div>
+                <div id="reset-btn-group" style="display:none;">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300 btn-hover">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Enhanced Flash Messages -->
     <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-80">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="space-y-4 animate-fade-in">
+            <div class="space-y-4">
                 {% for category, message in messages %}
                     <div class="flash-message flex items-center p-4 rounded-xl shadow-2xl relative overflow-hidden backdrop-blur-sm 
                         {% if category == 'error' %}
@@ -284,7 +785,6 @@
                             bg-blue-50/90 border border-blue-300 text-blue-700
                         {% endif %}">
                         
-                        <!-- Animated background accent -->
                         <div class="absolute inset-0 opacity-20">
                             <div class="absolute inset-0 
                             {% if category == 'error' %}
@@ -329,99 +829,6 @@
                     </div>
                 {% endfor %}
             </div>
-    
-            <style>
-                @keyframes slideUp {
-                    from { transform: translateY(100%); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
-                }
-                
-                @keyframes slideDown {
-                    from { transform: translateY(0); opacity: 1; }
-                    to { transform: translateY(20px); opacity: 0; }
-                }
-                
-                .animate-fade-in {
-                    animation: slideUp 0.4s ease-out forwards;
-                }
-                
-                .animate-fade-out {
-                    animation: slideDown 0.3s ease-in forwards;
-                }
-                
-                .flash-message {
-                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
-                    transition: all 0.3s ease;
-                }
-                
-                .flash-message:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.1);
-                }
-            </style>
-    
-            <script>
-                // Function to remove a flash message with animation
-                function removeMessage(element) {
-                    element.classList.add('animate-fade-out');
-                    setTimeout(() => {
-                        element.style.height = element.offsetHeight + 'px';
-                        element.style.marginTop = '0';
-                        element.style.marginBottom = '0';
-                        
-                        setTimeout(() => {
-                            element.style.height = '0';
-                            element.style.marginTop = '0';
-                            element.style.marginBottom = '0';
-                            element.style.padding = '0';
-                            element.style.opacity = '0';
-                            
-                            setTimeout(() => {
-                                if (element.parentNode) {
-                                    element.parentNode.removeChild(element);
-                                }
-                            }, 300);
-                        }, 50);
-                    }, 250);
-                }
-                
-                // Setup close buttons
-                document.addEventListener('DOMContentLoaded', function() {
-                    const closeButtons = document.querySelectorAll('.close');
-                    closeButtons.forEach(button => {
-                        button.addEventListener('click', function() {
-                            const message = this.closest('.flash-message');
-                            removeMessage(message);
-                        });
-                    });
-                    
-                    // Auto-hide after 5 seconds
-                    const messages = document.querySelectorAll('.flash-message');
-                    messages.forEach(message => {
-                        // Add progress bar
-                        const progressBar = document.createElement('div');
-                        progressBar.className = 'absolute bottom-0 left-0 h-1 bg-gray-400/30';
-                        progressBar.style.width = '100%';
-                        progressBar.style.animation = 'shrinkWidth 5s linear forwards';
-                        message.appendChild(progressBar);
-                        
-                        // Auto dismiss after delay
-                        setTimeout(() => {
-                            removeMessage(message);
-                        }, 5000);
-                    });
-                });
-                
-                // Add keyframe animation for progress bar
-                const styleSheet = document.createElement('style');
-                styleSheet.textContent = `
-                    @keyframes shrinkWidth {
-                        from { width: 100%; }
-                        to { width: 0%; }
-                    }
-                `;
-                document.head.appendChild(styleSheet);
-            </script>
         {% endif %}
         {% endwith %}
     </div>
@@ -441,196 +848,436 @@
     .animate-slide-up {
         animation: slide-up 0.5s ease-out;
     }
+
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-out;
+    }
     </style>
     
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Navbar scroll handling
+            // Enhanced navbar scroll handling with smooth transitions
+            let lastScroll = 0;
+            const navbar = document.getElementById('navbar');
+            
             window.addEventListener('scroll', function() {
-                const navbar = document.getElementById('navbar');
-                const navText = document.getElementById('navText');
-                const navLinks = document.querySelectorAll('nav a');
+                const currentScroll = window.pageYOffset;
                 
-                if (window.scrollY > 100) {
-                    navbar.classList.add('bg-white');
-                    navbar.classList.add('shadow-md');
-                    
-                    navLinks.forEach(link => {
-                        link.style.color = '#1f2937'; // text-gray-800
-                    });
+                if (currentScroll <= 0) {
+                    navbar.classList.remove('bg-white', 'shadow-md');
+                    navbar.style.transform = 'translateY(0)';
+                } else if (currentScroll > lastScroll) {
+                    // Scrolling down
+                    navbar.style.transform = 'translateY(-100%)';
                 } else {
-                    navbar.classList.remove('bg-white');
-                    navbar.classList.remove('shadow-md');
-                    
-                    navLinks.forEach(link => {
-                        link.style.color = 'black';
-                    });
+                    // Scrolling up
+                    navbar.classList.add('bg-white', 'shadow-md');
+                    navbar.style.transform = 'translateY(0)';
                 }
+                
+                lastScroll = currentScroll;
             });
 
-            // Modal handling
+            // Modal elements - consolidated to avoid duplicates
             const loginModal = document.getElementById('loginModal');
             const signupModal = document.getElementById('signupModal');
+            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
             const loginBtn = document.getElementById('loginBtn');
-            const signupBtn = document.getElementById('signupBtn');
             const closeLoginModal = document.getElementById('closeLoginModal');
             const closeSignupModal = document.getElementById('closeSignupModal');
+            const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
             const switchToSignup = document.getElementById('switchToSignup');
             const switchToLogin = document.getElementById('switchToLogin');
+            const signupForm = document.getElementById('signupForm');
+            const loginForm = document.getElementById('loginForm');
             
+            // Enhanced modal handling with animations and error persistence
+            function showModal(modal) {
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.querySelector('div').classList.add('modal-enter');
+                    // Prevent body scroll when modal is open
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            function hideModal(modal) {
+                if (modal) {
+                    modal.querySelector('div').classList.add('modal-exit');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.querySelector('div').classList.remove('modal-exit');
+                        // Restore body scroll when modal is closed
+                        document.body.style.overflow = '';
+                    }, 300);
+                }
+            }
+
+            // Initialize modals based on server-side state
+            if (signupModal && signupModal.dataset.showModal === 'true') {
+                showModal(signupModal);
+            }
+
+            // Modal event listeners
             if (loginBtn) {
                 loginBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    loginModal.classList.remove('hidden');
-                });
-            }
-            
-            if (signupBtn) {
-                signupBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    signupModal.classList.remove('hidden');
+                    showModal(loginModal);
                 });
             }
             
             if (closeLoginModal) {
                 closeLoginModal.addEventListener('click', function() {
-                    loginModal.classList.add('hidden');
+                    hideModal(loginModal);
                 });
             }
             
             if (closeSignupModal) {
                 closeSignupModal.addEventListener('click', function() {
-                    signupModal.classList.add('hidden');
+                    hideModal(signupModal);
+                });
+            }
+            
+            if (closeForgotPasswordModal) {
+                closeForgotPasswordModal.addEventListener('click', function() {
+                    hideModal(forgotPasswordModal);
                 });
             }
             
             if (switchToSignup) {
                 switchToSignup.addEventListener('click', function(e) {
                     e.preventDefault();
-                    loginModal.classList.add('hidden');
-                    signupModal.classList.remove('hidden');
+                    hideModal(loginModal);
+                    setTimeout(() => showModal(signupModal), 300);
                 });
             }
             
             if (switchToLogin) {
                 switchToLogin.addEventListener('click', function(e) {
                     e.preventDefault();
-                    signupModal.classList.add('hidden');
-                    loginModal.classList.remove('hidden');
+                    hideModal(signupModal);
+                    setTimeout(() => showModal(loginModal), 300);
                 });
             }
-            
-            
-            const loginTogglePassword = document.getElementById('login-toggle-password');
-            const loginPassword = document.getElementById('login-password');
-            
-            if (loginTogglePassword && loginPassword) {
-                loginTogglePassword.addEventListener('click', function() {
-                    const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-                    loginPassword.setAttribute('type', type);
-                    
-                    // Toggle eye icon
-                    const eyeIcon = this.querySelector('i');
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
-            }
-            
-            // Toggle password visibility for signup (first password field)
-            const signupTogglePassword1 = document.getElementById('signup-toggle-password1');
-            const signupPassword1 = document.getElementById('signup-password1');
-            
-            if (signupTogglePassword1 && signupPassword1) {
-                signupTogglePassword1.addEventListener('click', function() {
-                    const type = signupPassword1.getAttribute('type') === 'password' ? 'text' : 'password';
-                    signupPassword1.setAttribute('type', type);
-                    
-                    // Toggle eye icon
-                    const eyeIcon = this.querySelector('i');
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
-            }
-            
-            // Toggle password visibility for signup (confirm password field)
-            const signupTogglePassword2 = document.getElementById('signup-toggle-password2');
-            const signupPassword2 = document.getElementById('signup-password2');
-            
-            if (signupTogglePassword2 && signupPassword2) {
-                signupTogglePassword2.addEventListener('click', function() {
-                    const type = signupPassword2.getAttribute('type') === 'password' ? 'text' : 'password';
-                    signupPassword2.setAttribute('type', type);
-                    
-                    // Toggle eye icon
-                    const eyeIcon = this.querySelector('i');
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
-            }
-            
+
             // Close modals when clicking outside
-            window.addEventListener('click', function(e) {
-                if (e.target === loginModal) {
-                    loginModal.classList.add('hidden');
+            window.addEventListener('click', function(event) {
+                if (event.target === loginModal) {
+                    hideModal(loginModal);
                 }
-                if (e.target === signupModal) {
-                    signupModal.classList.add('hidden');
+                if (event.target === signupModal) {
+                    hideModal(signupModal);
                 }
-            });
-            
-            // Close modals with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    loginModal.classList.add('hidden');
-                    signupModal.classList.add('hidden');
+                if (event.target === forgotPasswordModal) {
+                    hideModal(forgotPasswordModal);
                 }
             });
-        });
 
-        // New dropdown toggle functions for user and owner profile sections
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('hidden');
-        }
+            // Close modals on escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    if (!loginModal.classList.contains('hidden')) {
+                        hideModal(loginModal);
+                    }
+                    if (!signupModal.classList.contains('hidden')) {
+                        hideModal(signupModal);
+                    }
+                    if (!forgotPasswordModal.classList.contains('hidden')) {
+                        hideModal(forgotPasswordModal);
+                    }
+                }
+            });
 
-        function toggleOwnerDropdown() {
-            const dropdown = document.getElementById('ownerDropdown');
-            dropdown.classList.toggle('hidden');
-        }
+            // Prevent modal from closing on form submission if there are errors
+            if (signupForm) {
+                signupForm.addEventListener('submit', function(e) {
+                    const hasError = document.querySelector('.text-red-600');
+                    if (hasError) {
+                        e.preventDefault();
+                    }
+                });
+            }
 
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const userDropdown = document.getElementById('userDropdown');
-            const ownerDropdown = document.getElementById('ownerDropdown');
-            
-            // Check if user dropdown exists and is open
-            if (userDropdown && !userDropdown.classList.contains('hidden')) {
+            // Enhanced password toggle functionality
+            function setupPasswordToggle(toggleId, passwordId) {
+                const toggle = document.getElementById(toggleId);
+                const password = document.getElementById(passwordId);
                 
-                const userToggle = document.querySelector('[onclick="toggleUserDropdown()"]');
-                if (!event.target.closest('[onclick="toggleUserDropdown()"]') && 
-                    !event.target.closest('#userDropdown')) {
-                    userDropdown.classList.add('hidden');
+                if (toggle && password) {
+                    toggle.addEventListener('click', function() {
+                        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                        password.setAttribute('type', type);
+                        
+                        const eyeIcon = this.querySelector('i');
+                        eyeIcon.classList.toggle('fa-eye');
+                        eyeIcon.classList.toggle('fa-eye-slash');
+                    });
                 }
             }
             
-            // Check if owner dropdown exists and is open
-            if (ownerDropdown && !ownerDropdown.classList.contains('hidden')) {
-                // Check if click is outside the dropdown and its toggle button
-                if (!event.target.closest('[onclick="toggleOwnerDropdown()"]') && 
-                    !event.target.closest('#ownerDropdown')) {
-                    ownerDropdown.classList.add('hidden');
+            setupPasswordToggle('login-toggle-password', 'login-password');
+            setupPasswordToggle('signup-toggle-password1', 'signup-password1');
+            setupPasswordToggle('signup-toggle-password2', 'signup-password2');
+
+            // Enhanced dropdown handling
+            function toggleDropdown(dropdownId) {
+                const dropdown = document.getElementById(dropdownId);
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                    if (!dropdown.classList.contains('hidden')) {
+                        dropdown.classList.add('dropdown-enter');
+                    }
                 }
             }
-        });
 
-        
+            window.toggleUserDropdown = function() {
+                toggleDropdown('userDropdown');
+            }
+
+            window.toggleOwnerDropdown = function() {
+                toggleDropdown('ownerDropdown');
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                const userDropdown = document.getElementById('userDropdown');
+                const ownerDropdown = document.getElementById('ownerDropdown');
+                
+                if (userDropdown && !userDropdown.classList.contains('hidden')) {
+                    if (!event.target.closest('[onclick="toggleUserDropdown()"]')) {
+                        userDropdown.classList.add('dropdown-exit');
+                        setTimeout(() => {
+                            userDropdown.classList.add('hidden');
+                            userDropdown.classList.remove('dropdown-exit');
+                        }, 200);
+                    }
+                }
+                
+                if (ownerDropdown && !ownerDropdown.classList.contains('hidden')) {
+                    if (!event.target.closest('[onclick="toggleOwnerDropdown()"]')) {
+                        ownerDropdown.classList.add('dropdown-exit');
+                        setTimeout(() => {
+                            ownerDropdown.classList.add('hidden');
+                            ownerDropdown.classList.remove('dropdown-exit');
+                        }, 200);
+                    }
+                }
+            });
+
+            // Enhanced flash message handling
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(message => {
+                const closeBtn = message.querySelector('.close');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateY(20px)';
+                        setTimeout(() => message.remove(), 300);
+                    });
+                }
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    if (message.parentNode) {
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateY(20px)';
+                        setTimeout(() => message.remove(), 300);
+                    }
+                }, 5000);
+            });
+
+            // Forgot Password Modal logic
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const findQuestionBtn = document.getElementById('findQuestionBtn');
+            const questionGroup = document.getElementById('security-question-group');
+            const answerGroup = document.getElementById('security-answer-group');
+            const newPasswordGroup = document.getElementById('new-password-group');
+            const resetBtnGroup = document.getElementById('reset-btn-group');
+            const questionInput = document.getElementById('forgot-security-question');
+
+            findQuestionBtn.addEventListener('click', function() {
+                const email = document.getElementById('forgot-email').value.trim();
+                if (!email) {
+                    alert('Please enter your email first.');
+                    return;
+                }
+                fetch(`/get_security_question?email=${encodeURIComponent(email)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            questionInput.value = data.question;
+                            questionGroup.style.display = '';
+                            answerGroup.style.display = '';
+                            newPasswordGroup.style.display = '';
+                            resetBtnGroup.style.display = '';
+                        } else {
+                            questionInput.value = '';
+                            questionGroup.style.display = 'none';
+                            answerGroup.style.display = 'none';
+                            newPasswordGroup.style.display = 'none';
+                            resetBtnGroup.style.display = 'none';
+                            alert(data.message || 'No security question found for this email.');
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error fetching security question.');
+                    });
+            });
+        });
     </script>
 
-<script src="{{ url_for('static', filename='cottage_modals.js') }}"></script>
-<script src="{{ url_for('static', filename='modal_discovery.js') }}"></script>
-<script src="{{ url_for('static', filename='cottage_booking.js') }}"></script>
-<script src="{{ url_for('static', filename='my_reservation.js') }}"></script>
-<script src="{{ url_for('static', filename='new_book.js') }}"></script>
+    <script src="{{ url_for('static', filename='cottage_modals.js') }}"></script>
+    <script src="{{ url_for('static', filename='modal_discovery.js') }}"></script>
+    <script src="{{ url_for('static', filename='cottage_booking.js') }}"></script>
+    <script src="{{ url_for('static', filename='my_reservation.js') }}"></script>
+    <script src="{{ url_for('static', filename='new_book.js') }}"></script>
+    <script src="{{ url_for('static', filename='analytics.js') }}"></script>
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+
+    <!-- Mobile Menu Button -->
+    <button type="button" class="mobile-menu-button" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button type="button" class="absolute top-6 right-6 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200" onclick="toggleMobileMenu()" aria-label="Close mobile menu">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <ul>
+            {% if user.is_authenticated and user.role == 'user' %}
+                <li><a href="/" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-home w-6"></i> Home
+                </a></li>
+                <li><a href="/make-reservation" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-calendar-plus w-6"></i> Book Now
+                </a></li>
+                <li><a href="/my-reservations" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-list w-6"></i> My Reservations
+                </a></li>
+                <li><a href="{{ url_for('notifications.notifications') }}" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-bell w-6"></i> Notifications
+                    {% if unread_count > 0 %}
+                        <span class="ml-2 px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                    {% endif %}
+                </a></li>
+                <li><a href="/profile" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-user w-6"></i> Profile
+                </a></li>
+                <li><a href="/logout" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-sign-out-alt w-6"></i> Logout
+                </a></li>
+            {% elif user.is_authenticated and user.role == 'owner' %}
+                <li><a href="/dashboard" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-tachometer-alt w-6"></i> Dashboard
+                </a></li>
+                <li><a href="/my-cottages" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-home w-6"></i> My Cottages
+                </a></li>
+                <li><a href="/owner-reservations" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-calendar-check w-6"></i> Reservations
+                </a></li>
+                <li><a href="{{ url_for('owner.owner_notifications') }}" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-bell w-6"></i> Notifications
+                    {% if unread_count > 0 %}
+                        <span class="ml-2 px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                    {% endif %}
+                </a></li>
+                <li><a href="/profile" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-user w-6"></i> Profile
+                </a></li>
+                <li><a href="/logout" onclick="toggleMobileMenu()" class="flex items-center">
+                    <i class="fas fa-sign-out-alt w-6"></i> Logout
+                </a></li>
+            {% else %}
+                <li><a href="#" onclick="handleMobileLogin()" class="flex items-center">
+                    <i class="fas fa-sign-in-alt w-6"></i> Sign In
+                </a></li>
+            {% endif %}
+        </ul>
+    </div>
+
+    <script>
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const body = document.body;
+            
+            if (mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+                mobileMenuButton.classList.remove('active');
+                body.style.overflow = '';
+                
+                // Show logo and nav with delay
+                setTimeout(() => {
+                    document.querySelector('.logo-container').style.opacity = '1';
+                    document.querySelector('.logo-container').style.visibility = 'visible';
+                    document.querySelector('.desktop-nav').style.opacity = '1';
+                    document.querySelector('.desktop-nav').style.visibility = 'visible';
+                }, 300);
+            } else {
+                mobileMenu.classList.add('active');
+                mobileMenuButton.classList.add('active');
+                body.style.overflow = 'hidden';
+                
+                // Hide logo and nav immediately
+                document.querySelector('.logo-container').style.opacity = '0';
+                document.querySelector('.logo-container').style.visibility = 'hidden';
+                document.querySelector('.desktop-nav').style.opacity = '0';
+                document.querySelector('.desktop-nav').style.visibility = 'hidden';
+            }
+        }
+
+        function handleMobileLogin() {
+            toggleMobileMenu();
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal) {
+                loginModal.classList.remove('hidden');
+                loginModal.querySelector('div').classList.add('modal-enter');
+            }
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            
+            if (mobileMenu && mobileMenu.classList.contains('active') && 
+                !mobileMenu.contains(event.target) && 
+                !mobileMenuButton.contains(event.target)) {
+                toggleMobileMenu();
+            }
+        });
+
+        // Close mobile menu on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const mobileMenu = document.getElementById('mobileMenu');
+                if (mobileMenu && mobileMenu.classList.contains('active')) {
+                    toggleMobileMenu();
+                }
+            }
+        });
+
+        // Prevent body scroll when mobile menu is open
+        document.addEventListener('touchmove', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu && mobileMenu.classList.contains('active')) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+    </script>
+
+    {% block scripts %}{% endblock %}
 </body>
 </html>

@@ -42,13 +42,14 @@ def mark_all_as_read():
     return redirect(url_for('notifications.notifications'))
 
 
-@notifications_bp.route('/notifications/delete/<int:notification_id>', methods=['POST'])
+@notifications_bp.route('/delete/<int:notification_id>', methods=['POST'])
 @login_required
 def delete_notification(notification_id):
     conn = get_db_connection()
     Notification.delete_notification(conn, notification_id, current_user.id)
     conn.close()
-    return redirect(url_for('notifications.notifications'))
+    return redirect(url_for('notifications.notifications'))  # this must be a valid endpoint
+
 
 @notifications_bp.route('/notifications/delete-all', methods=['POST'])
 @login_required

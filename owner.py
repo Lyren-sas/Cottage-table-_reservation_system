@@ -4,7 +4,7 @@ from website.models import Notification, OwnerNotification
 
 if __name__ == '__main__':  
     app = create_app_1()
-
+    
     @app.context_processor
     def inject_notification_data():
         conn = get_db_connection()

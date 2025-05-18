@@ -33,6 +33,8 @@ def create_app():
     from .payment import payment_bp
     from .rating import ratings
     
+
+
     app.register_blueprint(views, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
     app.register_blueprint(cottages, url_prefix='/')
@@ -45,7 +47,8 @@ def create_app():
     app.register_blueprint(owner_bp, url_prefix='/')
     app.register_blueprint(payment_bp, url_prefix='/')
     app.register_blueprint(ratings, url_prefix='/')
-
+    
+    
 
     
     login_manager = LoginManager()
@@ -98,6 +101,7 @@ def create_app_1():
     from .owner_notification import owner_bp
     from .view import payment_bp
     from .rating import ratings
+    from .analytics import analytic
 
     app.register_blueprint(view_owner, url_prefix='/')
     app.register_blueprint(auth, url_prefix='/')
@@ -111,7 +115,7 @@ def create_app_1():
     app.register_blueprint(owner_bp, url_prefix='/')
     app.register_blueprint(payment_bp, url_prefix='/')
     app.register_blueprint(ratings, url_prefix='/')
-    
+    app.register_blueprint(analytic, url_prefix='/')
 
     login_manager = LoginManager()
     login_manager.login_view = 'auth.loginowner'

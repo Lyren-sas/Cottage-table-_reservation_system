@@ -21,92 +21,65 @@ def owner_reservations():
         
     conn = get_db_connection()
     try:
+        # Auto-decline expired reservations using the Reservation class method
+        from .models import Reservation
+        expired_count = Reservation.auto_decline_expired_reservations(conn)
         
-        user_cottages = OwnerCottage.get_cottages_by_user_id(conn, current_user.id)
+        # Get current date and tomorrow's date for status display
+        now = datetime.now().date()
+        tomorrow = now + timedelta(days=1)
         
-        # Get pending reservations
-        pending_reservations = []
-        cottage_ids = [cottage.id for cottage in user_cottages]
+        # Get all pending reservations for owner's cottages
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT r.*, u.name as guest_name, u.email as guest_email, u.phone as guest_phone,
+                   oc.cottage_no, oc.cottage_image, oc.cottage_location,
+                   ct.table_no, ct.capacity
+            FROM reservations r
+            JOIN users u ON r.user_id = u.id
+            JOIN owner_cottages oc ON r.cottage_id = oc.id
+            LEFT JOIN cottage_tables ct ON r.table_id = ct.id
+            WHERE oc.user_id = ? AND r.cottage_status = 'pending'
+            ORDER BY r.date_stay ASC, r.start_time ASC
+        ''', (current_user.id,))
+        pending_reservations = cursor.fetchall()
         
-        if cottage_ids:
-            placeholders = ','.join('?' * len(cottage_ids))
-            cursor = conn.cursor()
-            cursor.execute(f'''
-                SELECT r.*, 
-                       u.name as guest_name, 
-                       u.email as guest_email, 
-                       u.phone as guest_phone,
-                       oc.cottage_no,
-                       oc.cottage_location,
-                       oc.cottage_image,
-                       t.table_no
-                FROM reservations r
-                INNER JOIN users u ON r.user_id = u.id
-                INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
-                LEFT JOIN cottage_tables t ON r.table_id = t.id
-                WHERE r.cottage_id IN ({placeholders})
-                AND r.cottage_status = 'pending'
-                ORDER BY r.date_stay ASC
-            ''', cottage_ids)
-            
-            pending_reservations = cursor.fetchall()
+        # Get today's active reservations
+        cursor.execute('''
+            SELECT r.*, u.name as guest_name, u.email as guest_email, u.phone as guest_phone,
+                   oc.cottage_no, oc.cottage_image, oc.cottage_location,
+                   ct.table_no, ct.capacity
+            FROM reservations r
+            JOIN users u ON r.user_id = u.id
+            JOIN owner_cottages oc ON r.cottage_id = oc.id
+            LEFT JOIN cottage_tables ct ON r.table_id = ct.id
+            WHERE oc.user_id = ? 
+            AND r.date_stay = ?
+            AND r.cottage_status IN ('approved', 'paid_online', 'pay_onsite')
+            ORDER BY r.start_time ASC
+        ''', (current_user.id, now.strftime('%Y-%m-%d')))
+        active_today = cursor.fetchall()
         
-        # Get today's date in YYYY-MM-DD format
-        today = datetime.now().strftime('%Y-%m-%d')
-        tomorrow = (datetime.now() + timedelta(days=1)).strftime('%Y-%m-%d')
+        # Get upcoming reservations
+        cursor.execute('''
+            SELECT r.*, u.name as guest_name, u.email as guest_email, u.phone as guest_phone,
+                   oc.cottage_no, oc.cottage_image, oc.cottage_location,
+                   ct.table_no, ct.capacity,
+                   julianday(r.date_stay) - julianday('now') as days_until
+            FROM reservations r
+            JOIN users u ON r.user_id = u.id
+            JOIN owner_cottages oc ON r.cottage_id = oc.id
+            LEFT JOIN cottage_tables ct ON r.table_id = ct.id
+            WHERE oc.user_id = ? 
+            AND r.date_stay > ?
+            AND r.cottage_status IN ('approved', 'paid_online', 'pay_onsite')
+            ORDER BY r.date_stay ASC, r.start_time ASC
+        ''', (current_user.id, now.strftime('%Y-%m-%d')))
+        upcoming_reservations = cursor.fetchall()
         
-        # Get active reservations for today
-        active_today = []
-        if cottage_ids:
-            placeholders = ','.join('?' * len(cottage_ids))
-            cursor = conn.cursor()
-            cursor.execute(f'''
-                SELECT r.*, 
-                       u.name as guest_name, 
-                       u.email as guest_email, 
-                       u.phone as guest_phone,
-                       oc.cottage_no,
-                       oc.cottage_location,
-                       oc.cottage_image,
-                       t.table_no
-                FROM reservations r
-                INNER JOIN users u ON r.user_id = u.id
-                INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
-                LEFT JOIN cottage_tables t ON r.table_id = t.id
-                WHERE r.cottage_id IN ({placeholders})
-                AND r.cottage_status IN ('reserved', 'approved')
-                AND r.date_stay = ?
-                ORDER BY r.start_time ASC
-            ''', cottage_ids + [today])
-            
-            active_today = cursor.fetchall()
-        
-        # Get upcoming reservations (excluding today)
-        upcoming_reservations = []
-        if cottage_ids:
-            placeholders = ','.join('?' * len(cottage_ids))
-            cursor = conn.cursor()
-            cursor.execute(f'''
-                SELECT r.*, 
-                       u.name as guest_name, 
-                       u.email as guest_email, 
-                       u.phone as guest_phone,
-                       oc.cottage_no,
-                       oc.cottage_location,
-                       oc.cottage_image,
-                       t.table_no,
-                       julianday(r.date_stay) - julianday(?) as days_until
-                FROM reservations r
-                INNER JOIN users u ON r.user_id = u.id
-                INNER JOIN owner_cottages oc ON r.cottage_id = oc.id
-                LEFT JOIN cottage_tables t ON r.table_id = t.id
-                WHERE r.cottage_id IN ({placeholders})
-                AND r.cottage_status IN ('reserved', 'approved')
-                AND r.date_stay > ?
-                ORDER BY r.date_stay ASC
-            ''', [today] + cottage_ids + [today])
-            
-            upcoming_reservations = cursor.fetchall()
+        # Flash message if any reservations were auto-declined
+        if expired_count > 0:
+            flash(f'{expired_count} pending reservation(s) were automatically declined as they have expired.', 'info')
         
         # Get unread notifications count
         from .models import Notification
@@ -116,7 +89,7 @@ def owner_reservations():
                               pending_reservations=pending_reservations,
                               active_today=active_today,
                               upcoming_reservations=upcoming_reservations,
-                              now=today,
+                              now=now,
                               tomorrow=tomorrow,
                               unread_notifications=unread_notifications,
                               user=current_user)
@@ -601,4 +574,23 @@ def filter_notifications():
         return {'success': True, 'notifications': notifications_dict}
     finally:
         conn.close()
+
+def auto_decline_expired_reservations():
+    """Automatically decline pending reservations that have reached their date."""
+    from datetime import datetime
+    from models import Reservation, db
+    
+    current_date = datetime.now().date()
+    expired_reservations = Reservation.query.filter(
+        Reservation.status == 'pending',
+        Reservation.date_stay <= current_date
+    ).all()
+    
+    for reservation in expired_reservations:
+        reservation.status = 'declined'
+        reservation.declined_at = datetime.now()
+        # You might want to add a notification here for the user
+    
+    db.session.commit()
+    return len(expired_reservations)
 

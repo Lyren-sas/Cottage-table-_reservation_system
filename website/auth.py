@@ -2,7 +2,7 @@ import base64
 import io
 import sqlite3
 from tkinter import Image
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from .models import OwnerCottage, User,Owner
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, login_required, logout_user, current_user
@@ -65,7 +65,7 @@ def login():
     
     return render_template('home.html', user=current_user)
 
-@auth.route('/loginowner', methods=['GET', 'POST'])
+@auth.route('/owner/login', methods=['GET', 'POST'])
 def loginowner():
     if request.method == 'POST':
         email = request.form.get('email', '').strip()
@@ -73,7 +73,6 @@ def loginowner():
         
         conn = get_db_connection()
         try:
-           
             if not validate_email(email):
                 flash('Invalid email format.', 'error')
                 return render_template('owner_home.html', user=current_user)
@@ -82,16 +81,10 @@ def loginowner():
            
             if owner and check_password_hash(owner.password, password):
                 login_user(owner, remember=True)
-                
-               
                 flash(f'Welcome back, {owner.name}!', 'success')
-                
-                if owner.role == 'owner':
-                    return redirect(url_for('dashboard.dashboard_view', role_user=owner.role))
-                
-              
+                return redirect(url_for('dashboard.dashboard_view'))
             else:
-                flash('Acoount does not exist, Pls Try Again', 'error') 
+                flash('Email or Password is incorrect', 'error')
                 
         except Exception as e:
             flash(f'An error occurred during login: {str(e)}', 'error')
@@ -122,34 +115,74 @@ def signup():
         name = request.form.get('name', '').strip()
         password1 = request.form.get('password1', '')
         password2 = request.form.get('password2', '')
+        security_question = request.form.get('security_question', '').strip()
+        security_answer = request.form.get('security_answer', '').strip()
         
         conn = get_db_connection()
         try:
+            # Store form data for repopulation
+            form_data = {
+                'email': email,
+                'username': username,
+                'name': name,
+                'security_question': security_question,
+                'security_answer': security_answer
+            }
+            
             # Comprehensive validation
             if not validate_email(email):
-                flash('Invalid email format.', 'error')
-                return render_template('home.html', user=current_user)
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Invalid email format.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             
             if not validate_password(password1):
-                flash('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.', 'error')
-                return render_template('home.html', user=current_user)
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             
             user_email = User.get_user_by_email(conn, email)
             user_name = User.get_user_by_username(conn, username)
             
-           
             if user_email:
-                flash('Email already exists.', 'error')
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Email already exists.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             elif user_name:
-                flash('Username already exists.', 'error')
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Username already exists.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             elif len(email) < 4:
-                flash('Email must be greater than 3 characters.', 'error')
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Email must be greater than 3 characters.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             elif len(username) < 2:
-                flash('Username must be greater than 1 character.', 'error')
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Username must be greater than 1 character.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             elif len(name) < 2:
-                flash('Name must be greater than 1 character.', 'error')
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Name must be greater than 1 character.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             elif password1 != password2:
-                flash('Passwords don\'t match.', 'error')
+                return render_template('home.html', 
+                                    user=current_user,
+                                    signup_error='Passwords don\'t match.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
             else:
                 # Create user
                 new_user = User(
@@ -158,8 +191,9 @@ def signup():
                     name=name,
                     password=generate_password_hash(password1, method='pbkdf2:sha256'),
                     date_created=datetime.utcnow(),
-                    role="user"
-                    
+                    role="user",
+                    security_question=security_question,
+                    security_answer=security_answer
                 )
                 user_id = new_user.save_to_db(conn)
                 
@@ -168,13 +202,122 @@ def signup():
                 flash(f'Welcome to Norzagaray Cottage Reservation, {new_user.name}!', 'success')
                 return redirect(url_for('views.landing'))
         except Exception as e:
-            flash(f'An error occurred: {str(e)}', 'error')
+            return render_template('home.html', 
+                                user=current_user,
+                                signup_error=str(e),
+                                signup_data=form_data,
+                                show_signup_modal=True)
         finally:
             if conn:
                 conn.close()
     
     return render_template('home.html', user=current_user)
 
+@auth.route('/owner/signup', methods=['GET', 'POST'])
+def owner_signup():
+    if request.method == 'POST':
+        email = request.form.get('email', '').strip()
+        username = request.form.get('username', '').strip()
+        name = request.form.get('name', '').strip()
+        password1 = request.form.get('password1', '')
+        password2 = request.form.get('password2', '')
+        security_question = request.form.get('security_question', '').strip()
+        security_answer = request.form.get('security_answer', '').strip()
+        
+        conn = get_db_connection()
+        try:
+            # Store form data for repopulation
+            form_data = {
+                'email': email,
+                'username': username,
+                'name': name,
+                'security_question': security_question,
+                'security_answer': security_answer
+            }
+            
+            # Comprehensive validation
+            if not validate_email(email):
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Invalid email format.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            
+            if not validate_password(password1):
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            
+            owner_email = Owner.get_owner_by_email(conn, email)
+            owner_name = Owner.get_owner_by_username(conn, username)
+            
+            if owner_email:
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Email already exists.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            elif owner_name:
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Username already exists.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            elif len(email) < 4:
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Email must be greater than 3 characters.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            elif len(username) < 2:
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Username must be greater than 1 character.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            elif len(name) < 2:
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Name must be greater than 1 character.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            elif password1 != password2:
+                return render_template('owner_home.html', 
+                                    user=current_user,
+                                    signup_error='Passwords don\'t match.',
+                                    signup_data=form_data,
+                                    show_signup_modal=True)
+            else:
+                # Create owner
+                new_owner = Owner(
+                    email=email,
+                    username=username,
+                    name=name,
+                    password=generate_password_hash(password1, method='pbkdf2:sha256'),
+                    date_created=datetime.utcnow(),
+                    role="owner",
+                    security_question=security_question,
+                    security_answer=security_answer
+                )
+                user_id = new_owner.save_to_db(conn)
+                
+                # Login after signup
+                login_user(new_owner, remember=True)
+                flash(f'Welcome to Norzagaray Cottage Reservation, {new_owner.name}!', 'success')
+                return redirect(url_for('owner_views.ownerlanding'))
+        except Exception as e:
+            return render_template('owner_home.html', 
+                                user=current_user,
+                                signup_error=str(e),
+                                signup_data=form_data,
+                                show_signup_modal=True)
+        finally:
+            if conn:
+                conn.close()
+    
+    return render_template('owner_home.html', user=current_user)
 
 @auth.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -302,3 +445,93 @@ def validate_password(password):
     has_digit = any(c.isdigit() for c in password)
     has_special = any(not c.isalnum() for c in password)
     return has_upper and has_lower and has_digit and has_special
+
+@auth.route('/forgot_password', methods=['POST'])
+def forgot_password():
+    email = request.form.get('email')
+    question = request.form.get('security_question')
+    answer = request.form.get('security_answer')
+    new_password = request.form.get('new_password')
+    conn = get_db_connection()
+    cursor = conn.execute('SELECT * FROM users WHERE email = ?', (email,))
+    user = cursor.fetchone()
+    if not user:
+        flash('No user found with that email.', 'danger')
+        return redirect(url_for('index'))
+    # Map code to question text
+    question_map = {
+        'mother_maiden': "What is your mother's maiden name?",
+        'first_pet': "What was your first pet's name?",
+        'birth_city': "In what city were you born?",
+        'favorite_teacher': "Who was your favorite teacher?"
+    }
+    db_question = question_map.get(user['security_question'], user['security_question'])
+    if db_question != question or user['security_answer'].lower() != answer.strip().lower():
+        flash('Security question or answer is incorrect.', 'danger')
+        return redirect(url_for('index'))
+    hashed_pw = generate_password_hash(new_password)
+    conn.execute('UPDATE users SET user_pass = ? WHERE id = ?', (hashed_pw, user['id']))
+    conn.commit()
+    flash('Password reset successful. You can now log in.', 'success')
+    return redirect(url_for('views.landing'))
+
+@auth.route('/owner/forgot_password', methods=['POST'])
+def owner_forgot_password():
+    email = request.form.get('email')
+    question = request.form.get('security_question')
+    answer = request.form.get('security_answer')
+    new_password = request.form.get('new_password')
+    conn = get_db_connection()
+    cursor = conn.execute('SELECT * FROM owners WHERE email = ?', (email,))
+    owner = cursor.fetchone()
+    if not owner:
+        flash('No owner found with that email.', 'danger')
+        return redirect(url_for('owner.owner_login'))
+    if owner['security_question'] != question or owner['security_answer'].lower() != answer.strip().lower():
+        flash('Security question or answer is incorrect.', 'danger')
+        return redirect(url_for('owner.owner_login'))
+    hashed_pw = generate_password_hash(new_password)
+    conn.execute('UPDATE owners SET password = ? WHERE id = ?', (hashed_pw, owner['id']))
+    conn.commit()
+    flash('Password reset successful. You can now log in.', 'success')
+    return redirect(url_for('owner.owner_login'))
+
+@auth.route('/get_security_question')
+def get_security_question():
+    email = request.args.get('email', '').strip()
+    conn = get_db_connection()
+    cursor = conn.execute('SELECT security_question FROM users WHERE email = ?', (email,))
+    user = cursor.fetchone()
+    conn.close()
+    if not user or not user['security_question']:
+        return jsonify({'success': False, 'message': 'No security question found for this email.'})
+    # Map code to question text
+    question_map = {
+        'mother_maiden': "What is your mother's maiden name?",
+        'first_pet': "What was your first pet's name?",
+        'birth_city': "In what city were you born?",
+        'favorite_teacher': "Who was your favorite teacher?"
+    }
+    question_code = user['security_question']
+    question_text = question_map.get(question_code, question_code)
+    return jsonify({'success': True, 'question': question_text})
+
+@auth.route('/owner/get_security_question')
+def owner_get_security_question():
+    email = request.args.get('email', '').strip()
+    conn = get_db_connection()
+    cursor = conn.execute('SELECT security_question FROM owners WHERE email = ?', (email,))
+    owner = cursor.fetchone()
+    conn.close()
+    if not owner or not owner['security_question']:
+        return jsonify({'success': False, 'message': 'No security question found for this email.'})
+    # Map code to question text
+    question_map = {
+        'mother_maiden': "What is your mother's maiden name?",
+        'first_pet': "What was your first pet's name?",
+        'birth_city': "In what city were you born?",
+        'favorite_teacher': "Who was your favorite teacher?"
+    }
+    question_code = owner['security_question']
+    question_text = question_map.get(question_code, question_code)
+    return jsonify({'success': True, 'question': question_text})

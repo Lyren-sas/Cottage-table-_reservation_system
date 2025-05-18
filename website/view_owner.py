@@ -1,12 +1,18 @@
 import base64
 from datetime import datetime
 import io
-from flask import Blueprint, render_template, flash, redirect, send_file, url_for, request, session, jsonify
+import os
+from tkinter import Image
+from flask import Blueprint, current_app, render_template, flash, redirect, send_file, url_for, request, session, jsonify
 from flask_login import login_required, current_user
+from sympy import ImageSet
 from . import get_db_connection
 from .models import Notification, Reservation, OwnerCottage, Amenity, CottageAmenity
 from typing import List
 from datetime import datetime, timedelta
+from PIL import ImageDraw, ImageFont
+from PIL import Image as PILImage
+
 
 
 view_owner = Blueprint('owner_views', __name__)
@@ -81,14 +87,13 @@ def user_notifications():
 def user_image(user_id):
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute('SELECT user_image FROM users WHERE id = ?', (user_id,))
+    cursor.execute('SELECT user_image, name FROM users WHERE id = ?', (user_id,))
     row = cursor.fetchone()
     conn.close()
     
     if row and row['user_image']:
         # Check if the image is stored as base64
         try:
-            # Decode base64 image
             image_data = base64.b64decode(row['user_image'])
             return send_file(
                 io.BytesIO(image_data),
@@ -97,9 +102,45 @@ def user_image(user_id):
         except Exception as e:
             # If already binary or another error occurs
             return send_file(
-                io.BytesIO(row['user_image']),
+                io.BytesIO(row['user_image']), 
                 mimetype='image/png'
             )
     else:
-        # Serve a default image if user has no image
-        return send_file('static/default_profile.png', mimetype='image/png')
+        # Generate an image with the first letter of the user's name
+        if row and row['name']:
+            first_letter = row['name'][0].upper()
+            
+            # Create a colored background with the first letter
+            image = Image.new('RGB', (200, 200), color=(73, 109, 137))  # A nice blue-gray color
+            
+            try:
+                # Try to load the font, with fallback options
+                try:
+                    font = ImageSet.truetype('DejaVuSans-Bold.ttf', 120)
+                except IOError:
+                    try:
+                        font = ImageSet.truetype('Arial.ttf', 120)
+                    except IOError:
+                        # Use default font as last resort
+                        font = ImageSet.load_default()
+                
+                draw = ImageDraw.Draw(image)
+                
+                # Calculate text size to center it
+                text_width, text_height = draw.textsize(first_letter, font=font)
+                position = ((200 - text_width) // 2, (200 - text_height) // 2 - 10)
+                
+                # Draw the letter in white
+                draw.text(position, first_letter, font=font, fill=(255, 255, 255))
+                
+                img_io = io.BytesIO()
+                image.save(img_io, 'PNG')
+                img_io.seek(0)
+                return send_file(img_io, mimetype='image/png')
+            
+            except Exception as e:
+                print(f"Error generating letter image: {e}")
+                return send_file('static/profile.png', mimetype='image/png')
+        else:
+            # Default image if we can't get the user's name
+            return send_file('static/profile.png', mimetype='image/png')

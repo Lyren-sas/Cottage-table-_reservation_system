@@ -51,55 +51,18 @@ document.addEventListener('DOMContentLoaded', () => {
       
       // Create initial reviews container
       const initialReviewsContainer = document.createElement('div');
-      initialReviewsContainer.className = 'initial-reviews';
+      initialReviewsContainer.className = 'space-y-6';
       reviewsContainer.appendChild(initialReviewsContainer);
-      
-      // Create hidden reviews container (for expanding)
-      const hiddenReviewsContainer = document.createElement('div');
-      hiddenReviewsContainer.className = 'hidden-reviews';
-      hiddenReviewsContainer.style.display = 'none';
-      reviewsContainer.appendChild(hiddenReviewsContainer);
       
       // Create and append review cards
       data.reviews.forEach((review, index) => {
-        console.log(`Processing review #${index + 1}:`, review.name, review.rating_value);
+        console.log(`Processing review #${index + 1}:`, review);
+        console.log('User image data:', review.user_image ? 'Present' : 'Missing');
         
         // Create review card element
         const card = createReviewCard(review, index);
-        
-        // Add to initial or hidden container based on index
-        if (index < 5) {
-          initialReviewsContainer.appendChild(card);
-        } else {
-          hiddenReviewsContainer.appendChild(card);
-        }
+        initialReviewsContainer.appendChild(card);
       });
-      
-      // Only add the "Show All" button if there are more than 5 reviews
-      if (data.reviews.length > 5) {
-        const showMoreButton = document.createElement('button');
-        showMoreButton.className = 'mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-200';
-        showMoreButton.textContent = 'Show All Reviews';
-        showMoreButton.setAttribute('aria-expanded', 'false');
-        
-        showMoreButton.addEventListener('click', function() {
-          const isExpanded = hiddenReviewsContainer.style.display !== 'none';
-          
-          if (isExpanded) {
-            // Hide the reviews
-            hiddenReviewsContainer.style.display = 'none';
-            showMoreButton.textContent = 'Show All Reviews';
-            showMoreButton.setAttribute('aria-expanded', 'false');
-          } else {
-            // Show the reviews
-            hiddenReviewsContainer.style.display = 'block';
-            showMoreButton.textContent = 'Show Less';
-            showMoreButton.setAttribute('aria-expanded', 'true');
-          }
-        });
-        
-        reviewsContainer.appendChild(showMoreButton);
-      }
     })
     .catch(err => {
       console.error('Error fetching reviews:', err);
@@ -113,120 +76,127 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-/**
- * Creates a review card DOM element
- * @param {Object} review - The review data
- * @param {number} index - The review index
- * @returns {HTMLElement} - The review card element
- */
 function createReviewCard(review, index) {
+    console.log('Creating review card for:', review);
+    
     // Create main card container
     const card = document.createElement('div');
-    card.className = 'flex space-x-4 mb-4 p-4 border border-gray-100 rounded shadow-sm hover:shadow transition-shadow duration-200';
+    card.className = 'bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow duration-300';
 
-    // Reviewer avatar
-    const img = document.createElement('img');
-    img.className = 'h-12 w-12 rounded-full object-cover';
-    img.alt = `${review.name || 'Anonymous'}'s avatar`;
-    
-    // Handle image properly - might be base64 encoded or URL path
-    if (review.image_b64) {
-        if (review.image_b64.startsWith('http') || review.image_b64.startsWith('/')) {
-            // It's a URL path
-            img.src = review.image_b64;
-        } else {
-            // It's a base64 encoded string
-            img.src = `data:image/png;base64,${review.image_b64}`;
+    // Create avatar container
+    const avatarContainer = document.createElement('div');
+    avatarContainer.className = 'flex-shrink-0';
+
+    // Handle user image
+    if (review.user_image) {
+        console.log('User image found, creating image element');
+        const img = document.createElement('img');
+        img.className = 'w-12 h-12 rounded-full object-cover border-2 border-gray-200';
+        img.alt = `${review.user_name || 'Anonymous'}'s avatar`;
+        
+        // Set image source based on the type of data
+        if (typeof review.user_image === 'string') {
+            if (review.user_image.startsWith('data:')) {
+                img.src = review.user_image;
+            } else if (review.user_image.startsWith('http') || review.user_image.startsWith('/')) {
+                img.src = review.user_image;
+            } else {
+                img.src = `data:image/jpeg;base64,${review.user_image}`;
+            }
         }
+        
+        // Add error handling
+        img.onerror = function() {
+            console.log('Image failed to load, creating fallback avatar');
+            const fallbackDiv = createFallbackAvatar(review.user_name);
+            this.parentNode.replaceChild(fallbackDiv, this);
+        };
+        
+        avatarContainer.appendChild(img);
     } else {
-        img.src = '/static/default-avatar.png';  // fallback
-        console.log('Using default avatar for review', index + 1);
+        console.log('No user image, creating fallback avatar');
+        avatarContainer.appendChild(createFallbackAvatar(review.user_name));
     }
-    
-    // Add onerror handler to use default if image fails to load
-    img.onerror = function() {
-        console.log('Image failed to load, using default avatar');
-        this.src = '/static/default-avatar.png';
-        this.onerror = null; // Prevent infinite loop if default also fails
-    };
 
-    // Content container
-    const body = document.createElement('div');
-    body.className = 'flex-1';
+    // Create content container
+    const contentContainer = document.createElement('div');
+    contentContainer.className = 'flex-grow';
 
-    // Name + stars row
+    // Create header with name and date
     const header = document.createElement('div');
-    header.className = 'flex items-center space-x-2';
+    header.className = 'flex items-center justify-between mb-2';
     
-    const nameSpan = document.createElement('span');
-    nameSpan.className = 'font-medium text-gray-800';
-    nameSpan.textContent = review.name || 'Anonymous';
+    const nameSpan = document.createElement('h3');
+    nameSpan.className = 'text-lg font-semibold text-gray-800';
+    nameSpan.textContent = review.user_name || 'Anonymous';
 
-    // Star rating
-    const stars = createStarRating(review.rating_value);
-    
-    header.append(nameSpan, stars);
+    const dateSpan = document.createElement('span');
+    dateSpan.className = 'text-sm text-gray-500';
+    dateSpan.textContent = formatDate(review.date_created);
 
-    // Comment
+    header.append(nameSpan, dateSpan);
+
+    // Create rating
+    const ratingDiv = document.createElement('div');
+    ratingDiv.className = 'flex items-center mb-2';
+    ratingDiv.appendChild(createStarRating(review.rating));
+
+    // Create comment
     const comment = document.createElement('p');
-    comment.className = 'mt-1 text-gray-700';
-    comment.textContent = review.comments || '— no comment —';
+    comment.className = 'text-gray-600';
+    comment.textContent = review.comment || '— no comment —';
 
-    // Date
-    const date = document.createElement('p');
-    date.className = 'mt-1 text-xs text-gray-500';
-    try {
-        date.textContent = formatDate(review.created_at);
-    } catch (e) {
-        console.error('Error formatting date:', e);
-        date.textContent = review.created_at || 'Unknown date';
-    }
-
-    // Assemble components
-    body.append(header, comment, date);
-    card.append(img, body);
+    // Assemble the card
+    contentContainer.append(header, ratingDiv, comment);
+    
+    const mainContainer = document.createElement('div');
+    mainContainer.className = 'flex items-start space-x-4';
+    mainContainer.append(avatarContainer, contentContainer);
+    
+    card.appendChild(mainContainer);
     
     return card;
 }
 
-/**
- * Creates a star rating element
- * @param {number} rating - The star rating (1-5)
- * @returns {HTMLElement} - The star rating element
- */
+function createFallbackAvatar(userName) {
+    const avatarDiv = document.createElement('div');
+    avatarDiv.className = 'w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center';
+    
+    const initial = document.createElement('span');
+    initial.className = 'text-gray-600 font-bold text-lg';
+    initial.textContent = (userName || 'A').charAt(0).toUpperCase();
+    
+    avatarDiv.appendChild(initial);
+    return avatarDiv;
+}
+
 function createStarRating(rating) {
     const stars = document.createElement('div');
-    stars.className = 'flex';
+    stars.className = 'flex items-center';
     
     // Ensure rating is a number
     const numericRating = Number(rating) || 0;
     
+    // Create stars container
+    const starsContainer = document.createElement('div');
+    starsContainer.className = 'flex';
+    
     for (let i = 1; i <= 5; i++) {
-        const star = document.createElement('i');
-        
-        if (i <= numericRating) {
-            star.className = 'fas fa-star text-yellow-500 mr-1';
-        } else {
-            star.className = 'far fa-star text-yellow-400 mr-1';
-        }
-        
-        stars.appendChild(star);
+        const star = document.createElement('span');
+        star.className = i <= numericRating ? 'text-yellow-400' : 'text-gray-300';
+        star.textContent = i <= numericRating ? '★' : '☆';
+        starsContainer.appendChild(star);
     }
 
     // Add numeric rating
     const ratingText = document.createElement('span');
-    ratingText.className = 'ml-1 text-sm text-gray-600';
+    ratingText.className = 'ml-2 text-sm text-gray-600';
     ratingText.textContent = `${numericRating}/5`;
-    stars.appendChild(ratingText);
     
+    stars.append(starsContainer, ratingText);
     return stars;
 }
 
-/**
- * Formats a date string nicely
- * @param {string} dateStr - The date string
- * @returns {string} - Formatted date
- */
 function formatDate(dateStr) {
     if (!dateStr) return 'Unknown date';
     
@@ -241,7 +211,7 @@ function formatDate(dateStr) {
         // Format options for date display
         const options = { 
             year: 'numeric', 
-            month: 'short', 
+            month: 'long', 
             day: 'numeric' 
         };
         

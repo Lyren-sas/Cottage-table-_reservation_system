@@ -4,67 +4,76 @@
 {% block title %}Book Cottage #{{ cottage.cottage_no }} - Balugan Cottage{% endblock %}
 
 {% block content %}
-<div class="py-8 bg-gray-50 min-h-screen">
+<div class="py-8 bg-gradient-to-b from-blue-50 to-green-50 min-h-screen">
     <div class="container mx-auto px-4">
-        <!-- Back Button -->
-        <a href="{{ url_for('make-reservation.make_reservation', date=selected_date) }}" class="inline-flex items-center mb-6 text-blue-600 hover:text-blue-800">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+        <!-- Enhanced Back Button -->
+        <a href="{{ url_for('make-reservation.make_reservation', date=selected_date) }}" 
+           class="inline-flex items-center mb-6 text-blue-600 hover:text-blue-800 transition-colors duration-300 group">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1 transform group-hover:-translate-x-1 transition-transform duration-300" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clip-rule="evenodd" />
             </svg>
             Back to Cottages
         </a>
        
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <!-- Cottage Header Section -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:shadow-2xl">
+            <!-- Enhanced Cottage Header Section -->
             <div class="flex flex-col md:flex-row">
                 {% if cottage.cottage_image %}
-                    <div class="w-full md:w-1/3 bg-gray-200">
-                        <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" alt="Cottage #{{ cottage.cottage_no }}" class="w-full h-64 object-cover">
+                    <div class="w-full md:w-1/3 bg-gray-200 relative overflow-hidden group">
+                        <img src="{{ url_for('static', filename='cottage_images/' + cottage.cottage_image) }}" 
+                             alt="Cottage #{{ cottage.cottage_no }}" 
+                             class="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-110">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                 {% else %}
-                    <div class="w-full md:w-1/3 bg-gray-200 flex items-center justify-center h-48">
+                    <div class="w-full md:w-1/3 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center h-48">
                         <span class="text-gray-500">No Image</span>
                     </div>
                 {% endif %}
                 
-                <div class="p-6 w-full md:w-2/3">
-                    <div class="flex items-center mb-2">
-                        <h1 class="text-2xl font-bold text-gray-800">Cottage #{{ cottage.cottage_no }}</h1>
-                        <span class="ml-2 px-3 py-1 bg-{{ cottage.flag_color|lower }}-100 text-{{ cottage.flag_color|lower }}-700 rounded-full text-sm">{{ cottage.flag_color }} Flag</span>
+                <div class="p-8 w-full md:w-2/3">
+                    <div class="flex items-center mb-4">
+                        <h1 class="text-3xl font-bold text-gray-800">Cottage #{{ cottage.cottage_no }}</h1>
+                        <span class="ml-4 px-4 py-1.5 bg-{{ cottage.flag_color|lower }}-100 text-{{ cottage.flag_color|lower }}-700 rounded-full text-sm font-medium flex items-center transform transition-all duration-300 hover:scale-105">
+                            <span class="h-3 w-3 bg-{{ cottage.flag_color|lower }}-500 rounded-full mr-2"></span>
+                            {{ cottage.flag_color }} Flag
+                        </span>
                     </div>
                     
                     {% if cottage.cottage_description %}
-                        <p class="text-gray-600 mb-4">{{ cottage.cottage_description }}</p>
+                        <p class="text-gray-600 mb-6 leading-relaxed">{{ cottage.cottage_description }}</p>
                     {% endif %}
-                    
-                    
                 </div>
-
-                
             </div>
             
-            <!-- Cottage Discoveries Carousel -->
-                <div class="p-6 border-t border-gray-200">
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">Discover More About This Cottage</h2>
+            <!-- Enhanced Cottage Discoveries Carousel -->
+            <div class="p-8 border-t border-gray-200 bg-gray-50">
+                <h2 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Discover More About This Cottage
+                </h2>
 
                 <div class="cottage-carousel relative">
-                    <div class="carousel-container overflow-hidden">
-                        <div class="carousel-track flex transition-transform duration-300" id="carouselTrack">
+                    <div class="carousel-container overflow-hidden rounded-xl">
+                        <div class="carousel-track flex transition-transform duration-500 ease-out" id="carouselTrack">
                             {% if cottage_discoveries %}
                                 {% for discovery in cottage_discoveries %}
-                                    <div class="carousel-item flex-none w-full md:w-1/3 p-2">
-                                        <div class="bg-gray-50 rounded-lg p-4 h-full shadow-sm">
+                                    <div class="carousel-item flex-none w-full md:w-1/3 p-4">
+                                        <div class="bg-white rounded-xl p-6 h-full shadow-md hover:shadow-lg transition-shadow duration-300">
                                             {% if discovery.image_filename %}
                                                 <img src="{{ url_for('static', filename='discovery_images/' + discovery.image_filename) }}" 
-                                                        alt="Cottage Discovery" class="w-full h-48 object-cover rounded-md mb-3">
+                                                     alt="Cottage Discovery" 
+                                                     class="w-full h-48 object-cover rounded-lg mb-4 transform transition-transform duration-300 hover:scale-105">
                                             {% endif %}
                                             <p class="text-gray-600">{{ discovery.description }}</p>
                                         </div>
                                     </div>
                                 {% endfor %}
                             {% else %}
-                                <div class="carousel-item flex-none w-full p-2">
-                                    <div class="bg-gray-50 rounded-lg p-4 h-full shadow-sm text-center">
+                                <div class="carousel-item flex-none w-full p-4">
+                                    <div class="bg-white rounded-xl p-6 h-full shadow-md text-center">
                                         <p class="text-gray-500">No discoveries available for this cottage yet.</p>
                                     </div>
                                 </div>
@@ -72,28 +81,39 @@
                         </div>
                     </div>
                     
-                    <!-- Carousel Controls -->
-                    <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow p-2 ml-2 hover:bg-gray-100">
+                    <!-- Enhanced Carousel Controls -->
+                    <button id="prevBtn" class="absolute left-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-lg p-3 ml-4 hover:bg-gray-100 transition-colors duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow p-2 mr-2 hover:bg-gray-100">
+                    <button id="nextBtn" class="absolute right-0 top-1/2 transform -translate-y-1/2 bg-white rounded-full shadow-lg p-3 mr-4 hover:bg-gray-100 transition-colors duration-300">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </button>
                 </div>
-                </div>
-                    <div class="p-6 border-t border-gray-200" id="reviewsSection">
-                        <h2 class="text-xl font-semibold mb-4 text-gray-800">Guest Reviews</h2>
-                        <div id="reviewsContainer" class="space-y-6">
-                        <p class="text-gray-500">Loading reviews…</p>
-                        </div>
+            </div>
+
+            <!-- Enhanced Reviews Section -->
+            <div class="p-8 border-t border-gray-200" id="reviewsSection">
+                <h2 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    Guest Reviews
+                </h2>
+                <div id="reviewsContainer" class="space-y-6">
+                    <div class="flex items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
                     </div>
+                </div>
+            </div>
                
-            <!-- Booking Form Initial Section - Only Date and Time Selection -->
-            <form method="POST" action="{{ url_for('make-reservation.process_reservation') }}" id="bookingForm" class="p-6 border-t border-gray-200"
+            <!-- Enhanced Booking Form -->
+            <form method="POST" action="{{ url_for('make-reservation.process_reservation') }}" 
+                  id="bookingForm" 
+                  class="p-8 border-t border-gray-200 bg-gray-50"
                   data-availability-url="{{ url_for('make-reservation.check_availability') }}"
                   data-tables-url="{{ url_for('make-reservation.get_cottage_tables') }}"
                   data-image-base-path="{{ url_for('static', filename='table_images/') }}">
@@ -103,76 +123,85 @@
                 <input type="hidden" id="table_id" name="table_id" required>
                 <input type="hidden" id="amount" name="amount" value="{{ cottage.amount }}">
                 
-                <h2 class="text-xl font-semibold mb-4 text-gray-800">Select Date and Time</h2>
+                <h2 class="text-2xl font-semibold mb-6 text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    Select Date and Time
+                </h2>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    <div>
-                        <label for="date_stay" class="block text-gray-700 font-medium mb-2">Date of Stay</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <label for="date_stay" class="block text-gray-700 font-medium mb-3">Date of Stay</label>
                         <input 
                             type="date" 
                             id="date_stay" 
                             name="date_stay" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                             required
                             min="{{ today_date }}"
-                            value="{{ selected_date or today_date }}"
                             onchange="checkDateAvailability();"
                         />
                         <div id="date_availability_message" class="mt-2 text-sm hidden"></div>
                     </div>
                     
-                    <div>
-                        <label for="max_persons" class="block text-gray-700 font-medium mb-2">Capacity</label>
+                    <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <label for="max_persons" class="block text-gray-700 font-medium mb-3">Capacity</label>
                         <div class="flex items-center">
                             <input 
                                 type="number" 
                                 id="max_persons" 
                                 name="max_persons" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                                 required
                                 min="1"
                                 max="{{ cottage.max_persons }}"
                                 value="1"
                             />
-                            <span class="ml-2 text-sm text-gray-500"> {{ cottage.max_persons }}</span>
+                            <span class="ml-3 text-sm text-gray-500">of {{ cottage.max_persons }} max</span>
                         </div>
                     </div>
                     
-                    <div>
-                        <label for="start_time" class="block text-gray-700 font-medium mb-2">Start Time</label>
+                    <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <label for="start_time" class="block text-gray-700 font-medium mb-3">Start Time</label>
                         <input 
                             type="time" 
                             id="start_time" 
                             name="start_time" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                             required
-                            value="08:00"
                             onchange="updateEndTimeMin(); checkTimeAvailability();"
+                            disabled
                         />
+                        <div id="start_time_placeholder" class="text-sm text-gray-400 mt-2">Select a date first to choose a start time.</div>
                     </div>
                     
-                    <div>
-                        <label for="end_time" class="block text-gray-700 font-medium mb-2">End Time</label>
+                    <div class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300">
+                        <label for="end_time" class="block text-gray-700 font-medium mb-3">End Time</label>
                         <input 
                             type="time" 
                             id="end_time" 
                             name="end_time" 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
                             required
-                            value="17:00"
                             onchange="checkTimeAvailability()"
                         />
-                        <div id="time_availability_message" class="mt-2 text-sm hidden"></div>
+                        
                     </div>
                 </div>
                 
-                <!-- Table Selection Section -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold mb-3 text-gray-800">Select Table</h3>
-                    <div id="tableContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Tables will be loaded dynamically -->
-                        <div class="text-center py-4 text-gray-500">
-                            Loading tables...
+                <!-- Enhanced Table Selection Section -->
+                <div class="mb-8">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-800 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Select Table
+                    </h3>
+                    <div id="tableContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="text-center py-8 text-gray-500 bg-white rounded-xl shadow-sm">
+                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                            <p>Loading available tables...</p>
                         </div>
                     </div>
                 </div>
@@ -181,60 +210,65 @@
     </div>
 </div>
 
-<!-- Modal for Reservation Details -->
-<div id="reservationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-screen overflow-y-auto">
-        <div class="p-6">
-            <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xl font-bold text-gray-800">Complete Your Reservation</h2>
-                <button type="button" id="closeModal" class="text-gray-600 hover:text-gray-900">
+<!-- Enhanced Modal for Reservation Details -->
+<div id="reservationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center transition-opacity duration-300">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-screen overflow-y-auto transform transition-all duration-300 scale-95 opacity-0" id="modalContent">
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Complete Your Reservation
+                </h2>
+                <button type="button" id="closeModal" class="text-gray-600 hover:text-gray-900 transition-colors duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                 </button>
             </div>
             
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold mb-2 text-gray-800">Reservation Summary</h3>
-                <div class="bg-gray-50 p-4 rounded-md">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <p class="text-gray-600">Cottage:</p>
-                            <p class="font-medium">Cottage #{{ cottage.cottage_no }}</p>
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Reservation Summary</h3>
+                <div class="bg-gray-50 p-6 rounded-xl">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm">Cottage</p>
+                            <p class="font-medium text-lg">Cottage #{{ cottage.cottage_no }}</p>
                         </div>
-                        <div>
-                            <p class="text-gray-600">Table:</p>
-                            <p class="font-medium" id="selectedTableInfo">-</p>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm">Table</p>
+                            <p class="font-medium text-lg" id="selectedTableInfo">-</p>
                         </div>
-                        <div>
-                            <p class="text-gray-600">Date:</p>
-                            <p class="font-medium" id="selectedDateInfo">-</p>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm">Date</p>
+                            <p class="font-medium text-lg" id="selectedDateInfo">-</p>
                         </div>
-                        <div>
-                            <p class="text-gray-600">Time:</p>
-                            <p class="font-medium" id="selectedTimeInfo">-</p>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm">Time</p>
+                            <p class="font-medium text-lg" id="selectedTimeInfo">-</p>
                         </div>
-                        <div>
-                            <p class="text-gray-600">Persons:</p>
-                            <p class="font-medium" id="selectedPersonsInfo">-</p>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <p class="text-gray-600 text-sm">Persons</p>
+                            <p class="font-medium text-lg" id="selectedPersonsInfo">-</p>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Additional Amenities Section (in Modal) -->
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold mb-3 text-gray-800">Additional Amenities</h3>
+            <!-- Enhanced Additional Amenities Section -->
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Additional Amenities</h3>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {% for amenity in amenities %}
-                        <div class="flex items-center space-x-3 p-3 border border-gray-200 rounded-md hover:bg-gray-50">
+                        <div class="flex items-center space-x-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-300">
                             <input 
                                 type="checkbox" 
                                 id="amenity_{{ amenity.id }}" 
                                 name="amenities" 
                                 value="{{ amenity.id }}"
-                                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                class="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 transition-colors duration-300"
                                 onchange="updateTotalAmount()"
                                 data-price="{{ amenity.ame_price }}"
                             >
@@ -247,26 +281,26 @@
                 </div>
             </div>
             
-            <!-- Total Amount -->
-            <div class="flex justify-between items-center p-4 bg-gray-50 rounded-md mb-6">
-                <span class="text-lg font-semibold text-gray-800">Total Amount:</span>
+            <!-- Enhanced Total Amount -->
+            <div class="flex justify-between items-center p-6 bg-gray-50 rounded-xl mb-8">
+                <span class="text-xl font-semibold text-gray-800">Total Amount:</span>
                 <div>
-                    <span class="text-2xl font-bold text-green-600" id="totalAmount">₱{{ cottage.amount }}</span>
+                    <span class="text-3xl font-bold text-green-600" id="totalAmount">₱{{ cottage.amount }}</span>
                 </div>
             </div>
             
-            <div class="flex justify-end">
+            <div class="flex justify-end space-x-4">
                 <button 
                     type="button" 
                     id="cancelButton"
-                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition duration-300 mr-3"
+                    class="px-8 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                     Cancel
                 </button>
                 <button 
                     type="button" 
                     id="confirmButton"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition duration-300"
+                    class="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                     Confirm Reservation
                 </button>
@@ -280,4 +314,90 @@
     window.REVIEWS_URL = "{{ url_for('make-reservation.cottage_reviews', cottage_id=cottage.id) }}";
 </script>
 
-{% endblock %}
+<!-- Add custom styles -->
+<style>
+    /* Modal animations */
+    #reservationModal {
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    #reservationModal.show {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    #modalContent {
+        transform: scale(0.95);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    #modalContent.show {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    /* Table selection animations */
+    .table-card {
+        transition: all 0.3s ease;
+    }
+
+    .table-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .table-card.selected {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    /* Loading animations */
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    .animate-pulse {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+</style>
+
+<!-- Add this script at the end of the file -->
+<script>
+    // Set today's date in YYYY-MM-DD format
+    document.addEventListener('DOMContentLoaded', function() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        const formattedDate = `${year}-${month}-${day}`;
+        
+        const dateStayInput = document.getElementById('date_stay');
+        const startTimeInput = document.getElementById('start_time');
+        const startTimePlaceholder = document.getElementById('start_time_placeholder');
+        
+        function toggleStartTime() {
+            if (dateStayInput.value) {
+                startTimeInput.disabled = false;
+                startTimePlaceholder.style.display = 'none';
+            } else {
+                startTimeInput.disabled = true;
+                startTimePlaceholder.style.display = 'block';
+            }
+        }
+        
+        dateStayInput.addEventListener('change', toggleStartTime);
+        toggleStartTime(); // Initial check
+        
+        if (dateStayInput) {
+            dateStayInput.min = formattedDate;
+        }
+    });
+</script>
+{% endblock content %}

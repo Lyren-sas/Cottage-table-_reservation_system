@@ -1,4 +1,3 @@
-
 let currentCottageId = null;   
 let currentDiscoveries = [];   
 
@@ -24,29 +23,41 @@ function renderDiscoveries(discoveries) {
     container.innerHTML = '';
 
     if (discoveries.length === 0) {
-        container.innerHTML = '<p class="text-gray-500 text-center p-4 col-span-full">No discoveries yet. Add some!</p>';
+        container.innerHTML = `
+            <div class="col-span-full bg-white rounded-xl shadow-sm p-8 text-center">
+                <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-camera-retro text-2xl text-gray-400"></i>
+                </div>
+                <h3 class="text-xl font-medium text-gray-900 mb-2">No Discoveries Yet</h3>
+                <p class="text-gray-500 mb-6">Start by adding your first discovery to showcase your cottage.</p>
+            </div>`;
         return;
     }
 
     discoveries.forEach(discovery => {
         const card = document.createElement('div');
-        card.className = 'border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200';
+        card.className = 'bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow duration-200';
 
         card.innerHTML = `
             <div class="relative">
                 <img src="${discovery.image_url}" alt="Discovery Image" class="w-full h-48 object-cover">
-                <div class="absolute top-0 right-0 p-2">
-                    <button onclick="editDiscovery('${discovery.id}', '${discovery.description?.replace(/'/g, "\\'") || ''}')" class="bg-white p-1 rounded-full text-gray-600 hover:text-blue-600 mr-1">
-                        <i class="fas fa-edit"></i>
+                <div class="absolute top-4 right-4 flex space-x-2">
+                    <button onclick="editDiscovery('${discovery.id}', '${discovery.description?.replace(/'/g, "\\'") || ''}')" 
+                            class="inline-flex items-center justify-center px-3 py-1 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors duration-200">
+                        <i class="fas fa-edit mr-1"></i> Edit
                     </button>
-                    <button onclick="deleteDiscovery('${discovery.id}')" class="bg-white p-1 rounded-full text-gray-600 hover:text-red-600">
-                        <i class="fas fa-trash"></i>
+                    <button onclick="deleteDiscovery('${discovery.id}')" 
+                            class="inline-flex items-center justify-center px-3 py-1 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors duration-200">
+                        <i class="fas fa-trash-alt mr-1"></i> Delete
                     </button>
                 </div>
             </div>
-            <div class="p-3">
-                <p class="text-sm text-gray-700" id="description-${discovery.id}">${discovery.description || 'No description'}</p>
-                <p class="text-xs text-gray-400 mt-1">${new Date(discovery.created_at).toLocaleString()}</p>
+            <div class="p-6">
+                <p class="text-gray-700 mb-2" id="description-${discovery.id}">${discovery.description || 'No description'}</p>
+                <p class="text-sm text-gray-500 flex items-center">
+                    <i class="fas fa-clock mr-2 text-gray-400"></i>
+                    ${new Date(discovery.created_at).toLocaleString()}
+                </p>
             </div>
         `;
 
@@ -56,27 +67,41 @@ function renderDiscoveries(discoveries) {
 
 // Function to open the edit discovery modal
 function editDiscovery(discoveryId, currentDescription) {
-    // Create edit modal if it doesn't exist
     let editModal = document.getElementById('editDiscoveryModal');
     
     if (!editModal) {
         editModal = document.createElement('div');
         editModal.id = 'editDiscoveryModal';
-        editModal.className = 'fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50';
+        editModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden';
         editModal.innerHTML = `
-            <div class="bg-white rounded-lg p-6 w-11/12 max-w-md">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Edit Discovery Description</h3>
-                <form id="edit-discovery-form">
-                    <input type="hidden" id="edit-discovery-id">
-                    <div class="mb-4">
-                        <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea id="edit-description" name="description" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500"></textarea>
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-gray-900">Edit Discovery</h2>
+                        <button type="button" onclick="document.getElementById('editDiscoveryModal').classList.add('hidden')" 
+                                class="text-gray-400 hover:text-gray-600 transition-colors duration-200">
+                            <i class="fas fa-times text-xl"></i>
+                        </button>
                     </div>
-                    <div class="flex justify-end space-x-2">
-                        <button type="button" id="cancel-edit" class="py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
-                        <button type="submit" class="py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700">Save Changes</button>
-                    </div>
-                </form>
+                    <form id="edit-discovery-form">
+                        <input type="hidden" id="edit-discovery-id">
+                        <div class="mb-6">
+                            <label for="edit-description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                            <textarea id="edit-description" name="description" rows="4" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                        </div>
+                        <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+                            <button type="button" id="cancel-edit" 
+                                    class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                                Cancel
+                            </button>
+                            <button type="submit" 
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         `;
         document.body.appendChild(editModal);
@@ -361,6 +386,66 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+// Add a delete confirmation modal
+function deleteDiscovery(discoveryId) {
+    let deleteModal = document.getElementById('deleteDiscoveryModal');
+    
+    if (!deleteModal) {
+        deleteModal = document.createElement('div');
+        deleteModal.id = 'deleteDiscoveryModal';
+        deleteModal.className = 'fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden';
+        deleteModal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-lg max-w-md w-full mx-4">
+                <div class="p-6">
+                    <div class="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+                        <i class="fas fa-exclamation-triangle text-xl text-red-600"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-center text-gray-900 mb-2">Confirm Deletion</h2>
+                    <p class="text-gray-600 text-center mb-6">Are you sure you want to delete this discovery? This action cannot be undone.</p>
+
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" onclick="document.getElementById('deleteDiscoveryModal').classList.add('hidden')" 
+                                class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors duration-200">
+                            Cancel
+                        </button>
+                        <button type="button" id="confirmDeleteDiscoveryBtn" 
+                                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200">
+                            Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(deleteModal);
+        
+        // Add event listener for delete confirmation
+        document.getElementById('confirmDeleteDiscoveryBtn').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/discoveries/cottage/delete-discovery/${discoveryId}`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Remove from current discoveries array
+                    currentDiscoveries = currentDiscoveries.filter(d => d.id !== discoveryId);
+                    // Re-render discoveries
+                    renderDiscoveries(currentDiscoveries);
+                    showAlert('success', 'Discovery deleted successfully');
+                    deleteModal.classList.add('hidden');
+                } else {
+                    showAlert('error', data.message || 'Failed to delete discovery');
+                }
+            } catch (error) {
+                console.error('Error deleting discovery:', error);
+                showAlert('error', 'Error deleting discovery: ' + error.message);
+            }
+        });
+    }
+    
+    deleteModal.classList.remove('hidden');
+}
 
 window.openDiscoveryModal = openDiscoveryModal;
 window.closeDiscoveryModal = closeDiscoveryModal;

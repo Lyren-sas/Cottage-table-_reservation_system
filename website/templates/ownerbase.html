@@ -14,87 +14,645 @@
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Allura&display=swap" rel="stylesheet">
+    <style>
+        /* Smooth scrolling for the entire page */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Navbar animations */
+        .navbar-transition {
+            transition: all 0.3s ease-in-out;
+        }
+
+        /* Interactive hover effects for nav links */
+        .nav-link {
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #3b82f6;
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* Modal animations */
+        .modal-enter {
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        .modal-exit {
+            animation: modalFadeOut 0.3s ease-in;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes modalFadeOut {
+            from {
+                opacity: 1;
+                transform: scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+        }
+
+        /* Dropdown animations */
+        .dropdown-enter {
+            animation: dropdownFadeIn 0.2s ease-out;
+        }
+
+        .dropdown-exit {
+            animation: dropdownFadeOut 0.2s ease-in;
+        }
+
+        @keyframes dropdownFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes dropdownFadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Button hover effects */
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Input focus effects */
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+
+        .input-focus:focus {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06);
+        }
+
+        /* Flash message animations */
+        .flash-message {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading spinner animation */
+        .loading-spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Enhanced responsive logo styles */
+        .logo-container {
+            width: auto;
+            max-width: 50%;
+        }
+
+        .logo-container img {
+            width: 100%;
+            height: auto;
+            max-height: 300px;
+            min-height: 100px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 1536px) {
+            .logo-container {
+                max-width: 45%;
+            }
+            .logo-container img {
+                max-height: 250px;
+            }
+        }
+
+        @media (max-width: 1280px) {
+            .logo-container {
+                max-width: 40%;
+            }
+            .logo-container img {
+                max-height: 200px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .logo-container {
+                max-width: 35%;
+            }
+            .logo-container img {
+                max-height: 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo-container {
+                max-width: 30%;
+            }
+            .logo-container img {
+                max-height: 150px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .logo-container {
+                max-width: 25%;
+            }
+            .logo-container img {
+                max-height: 120px;
+            }
+        }
+
+        /* Enhanced responsive sign-in text */
+        .sign-in-text {
+            font-size: clamp(1.25rem, 4vw, 2rem);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 640px) {
+            .sign-in-text {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Enhanced responsive styles */
+        :root {
+            --navbar-height-mobile: 80px;
+            --navbar-height-desktop: 150px;
+            --logo-height-mobile: 120px;
+            --logo-height-desktop: 300px;
+        }
+
+        /* Responsive container */
+        .container-responsive {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        @media (min-width: 640px) {
+            .container-responsive {
+                padding: 0 1.5rem;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container-responsive {
+                padding: 0 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container-responsive {
+                padding: 0 2.5rem;
+            }
+        }
+
+        @media (min-width: 1280px) {
+            .container-responsive {
+                padding: 0 3rem;
+            }
+        }
+
+        /* Enhanced mobile menu styles */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            padding: calc(var(--navbar-height-mobile) + 20px) 20px 20px;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+            display: block;
+        }
+
+        .mobile-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-menu li {
+            margin: 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-menu li:last-child {
+            border-bottom: none;
+        }
+
+        .mobile-menu a {
+            display: flex;
+            align-items: center;
+            padding: 16px 0;
+            color: #1a1a1a;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .mobile-menu a i {
+            width: 24px;
+            margin-right: 12px;
+            font-size: 1.2rem;
+            color: #3b82f6;
+        }
+
+        .mobile-menu a:hover {
+            color: #3b82f6;
+            padding-left: 10px;
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .mobile-menu-button {
+            display: none;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1001;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .mobile-menu-button span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background-color: #1a1a1a;
+            margin: 5px 0;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-menu-button.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .mobile-menu-button.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .mobile-menu-button.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(7px, -7px);
+        }
+
+        /* Responsive breakpoints */
+        @media (max-width: 1536px) {
+            .logo-container img {
+                max-height: 250px;
+            }
+        }
+
+        @media (max-width: 1280px) {
+            .logo-container img {
+                max-height: 200px;
+            }
+            .nav-link {
+                font-size: 1.1rem !important;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .desktop-nav {
+                display: none !important;
+            }
+            .mobile-menu-button {
+                display: block !important;
+            }
+            .logo-container {
+                max-width: 200px;
+            }
+            .logo-container img {
+                max-height: 180px;
+            }
+            .nav-link {
+                font-size: 1rem !important;
+            }
+            .navbar {
+                height: var(--navbar-height-mobile);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo-container {
+                max-width: 150px;
+            }
+            .logo-container img {
+                max-height: 150px;
+            }
+            .mobile-menu-button {
+                top: 15px;
+                right: 15px;
+            }
+            .mobile-menu {
+                padding-top: calc(var(--navbar-height-mobile) + 10px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .logo-container {
+                max-width: 120px;
+            }
+            .logo-container img {
+                max-height: 120px;
+            }
+            .mobile-menu-button {
+                top: 10px;
+                right: 10px;
+            }
+            .mobile-menu {
+                max-width: 100%;
+                padding-top: calc(var(--navbar-height-mobile) + 5px);
+            }
+        }
+
+        /* Hide logo and nav when mobile menu is active */
+        .mobile-menu.active ~ .logo-container,
+        .mobile-menu.active ~ .desktop-nav {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        /* Enhanced modal responsiveness */
+        @media (max-width: 640px) {
+            .modal-content {
+                width: 95% !important;
+                max-width: none !important;
+                margin: 1rem;
+                padding: 1rem !important;
+            }
+            
+            .modal-content h2 {
+                font-size: 1.5rem !important;
+            }
+            
+            .modal-content input,
+            .modal-content select,
+            .modal-content button {
+                font-size: 1rem !important;
+                padding: 0.75rem !important;
+            }
+        }
+
+        /* Enhanced flash message responsiveness */
+        @media (max-width: 640px) {
+            .flash-message {
+                width: 90% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+            }
+        }
+
+        /* Touch-friendly improvements */
+        @media (hover: none) {
+            .nav-link:hover::after {
+                width: 0;
+            }
+            
+            .mobile-menu a:active {
+                background-color: rgba(59, 130, 246, 0.1);
+            }
+            
+            .mobile-menu-button:active {
+                background-color: rgba(0, 0, 0, 0.1);
+            }
+        }
+    </style>
 </head>
 <body class="bg-white">   
     
-    <nav class="w-full h-[130px] fixed top-0 transition-colors duration-300 flex justify-between px-12 z-50 bg-white/50" id="navbar">
-        <div class="flex items-center absolute top-[20px] left-[30px] w-1/3">
-            <h1 class="text-yellow-400 text-4xl font-bold mt-4 w-full"
-                style="font-family: 'Dancing Script', cursive; 
-                       text-shadow: 2px 2px 3px rgb(0, 0, 0);
-                       letter-spacing: 2px;">
-              NORZAGARAY COTTAGE <br>RESERVATION
-            </h1>
+    <nav class="w-full h-[150px] fixed top-[10px] transition-colors duration-300 flex justify-between px-4 sm:px-6 md:px-8 lg:px-12 z-50 bg-transparent navbar-transition" id="navbar">
+        <div class="flex items-center absolute top-[-80px] left-[15px] sm:left-[20px] md:left-[25px] lg:left-[30px] logo-container">
+            <a href="/" class="block w-full">
+                <img src="{{ url_for('static', filename='logo.png') }}" 
+                     alt="Norzagaray Cottage Reservation" 
+                     class="w-full h-auto object-contain hover:scale-105 transition-transform duration-300 mix-blend-multiply">
+            </a>
         </div>
     
-        <div class="flex items-center absolute right-[30px] top-[20px]">
-            <ul class="flex space-x-8">
+        <!-- Mobile Menu Button -->
+        <button type="button" class="mobile-menu-button" onclick="toggleMobileMenu()" aria-label="Toggle mobile menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <!-- Desktop Navigation -->
+        <div class="desktop-nav flex items-center absolute right-[15px] sm:right-[20px] md:right-[25px] lg:right-[30px] top-[30px]">
+            <ul class="flex space-x-4 sm:space-x-6 md:space-x-8 nav-links">
                 {% if user.is_authenticated and user.role == 'user' %}
-                    <li><a href="/" class="text-black hover:text-blue-600 text-2xl font-medium transition-colors duration-300">Home</a></li>
-                    <li><a href="/make-reservation" class="text-black hover:text-blue-600 text-2xl font-medium transition-colors duration-300">Book Now</a></li>
-                    <li><a href="/my-reservations" class="text-black hover:text-blue-600 text-2xl font-medium transition-colors duration-300">My Reservations</a></li>
+                    <li><a href="/" class="nav-link text-black hover:text-blue-600 text-xl sm:text-2xl font-medium">Home</a></li>
+                    <li><a href="/make-reservation" class="nav-link text-black hover:text-blue-600 text-xl sm:text-2xl font-medium">Book Now</a></li>
+                    <li><a href="/my-reservations" class="nav-link text-black hover:text-blue-600 text-xl sm:text-2xl font-medium">My Reservations</a></li>
                     <li>
-                        <a href="{{ url_for('notifications.notifications') }}" class="relative inline-flex items-center">
-                            <svg class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ url_for('notifications.notifications') }}" class="relative inline-flex items-center btn-hover">
+                            <svg class="h-8 w-8 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C8.67 6.165 8 7.388 8 9v5.159c0 .538-.214 1.055-.595 1.436L6 17h5m4 0v1a3 3 0 01-6 0v-1m6 0H9" />
                             </svg>
                             {% if unread_count > 0 %}
-                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full animate-pulse">{{ unread_count }}</span>
                             {% endif %}
                         </a>
                     </li>
-    
                     <!-- User Dropdown -->
-                    <li class="flex items-center ml-8 cursor-pointer">
+                    <li class="flex items-center ml-4 sm:ml-8 cursor-pointer">
                         <div class="relative">
-                            <div class="flex items-center cursor-pointer" onclick="toggleUserDropdown()">
+                            <div class="flex items-center cursor-pointer btn-hover" onclick="toggleUserDropdown()">
                                 {% if user.is_authenticated %}
-                                    <img src="{{ url_for('views.user_image', user_id=user.id) }}" alt="{{ user.name }}" class="w-10 h-10 rounded-full object-cover mr-2">
+                                    {% if user.user_image %}
+                                        <img src="{{ url_for('views.user_image', user_id=user.id) }}" 
+                                             alt="{{ user.name }}" 
+                                             class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
+                                    {% else %}
+                                        <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
+                                            <span class="text-white font-bold text-lg">{{ user.name[0].upper() }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='profile.png') }}" 
+                                         alt="Guest" 
+                                         class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
                                 {% endif %}
-                                <span class="text-black hover:text-blue-600 text-lg font-medium transition-colors duration-300">{{ user.name }}</span>
+                                <span class="nav-link text-black hover:text-blue-600 text-lg font-medium">
+                                    {{ user.name }}
+                                </span>
                             </div>
-                            <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden">
-                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
-                                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            <div id="userDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden dropdown-enter">
+                                <a href="/profile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Profile</a>
+                                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Logout</a>
                             </div>
                         </div>
                     </li>
-    
                 {% elif user.is_authenticated and user.role == 'owner' %}
-                    <li><a href="/dashboard" class="text-black hover:text-blue-600 text-xl font-medium transition-colors duration-300">Dashboard</a></li>
-                    <li><a href="/my-cottages" class="text-black hover:text-blue-600 text-xl font-medium transition-colors duration-300">My Cottages</a></li>
-                    <li><a href="/owner-reservations" class="text-black hover:text-blue-600 text-xl font-medium transition-colors duration-300">Reservations</a></li>
-    
+                    <li><a href="/dashboard" class="nav-link text-black hover:text-blue-600 text-lg sm:text-xl font-medium">Dashboard</a></li>
+                    <li><a href="/my-cottages" class="nav-link text-black hover:text-blue-600 text-lg sm:text-xl font-medium">My Cottages</a></li>
+                    <li><a href="/owner-reservations" class="nav-link text-black hover:text-blue-600 text-lg sm:text-xl font-medium">Reservations</a></li>
                     <li>
-                        <a href="{{ url_for('owner.owner_notifications') }}" class="relative inline-flex items-center">
-                            <svg class="h-10 w-10 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <a href="{{ url_for('owner.owner_notifications') }}" class="relative inline-flex items-center btn-hover">
+                            <svg class="h-8 w-8 sm:h-10 sm:w-10 text-gray-600 hover:text-blue-600 transition-colors duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V4a2 2 0 10-4 0v1.341C8.67 6.165 8 7.388 8 9v5.159c0 .538-.214 1.055-.595 1.436L6 17h5m4 0v1a3 3 0 01-6 0v-1m6 0H9" />
                             </svg>
                             {% if unread_count > 0 %}
-                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                                <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full animate-pulse">{{ unread_count }}</span>
                             {% endif %}
                         </a>
                     </li>
-    
                     <!-- Owner Dropdown -->
-                    <li class="flex items-center ml-8 cursor-pointer">
+                    <li class="flex items-center ml-4 sm:ml-8 cursor-pointer">
                         <div class="relative">
-                            <div class="flex items-center cursor-pointer" onclick="toggleOwnerDropdown()">
+                            <div class="flex items-center cursor-pointer btn-hover" onclick="toggleOwnerDropdown()">
                                 {% if user.is_authenticated %}
-                                    <img src="{{ url_for('owner_views.user_image', user_id=user.id) }}" alt="{{ user.name }}" class="w-10 h-10 rounded-full object-cover mr-2">
+                                    <img src="{{ url_for('owner_views.user_image', user_id=user.id) }}" 
+                                         alt="{{ user.name }}" 
+                                         class="w-10 h-10 rounded-full object-cover mr-2 hover:ring-2 hover:ring-blue-500 transition-all duration-300">
                                 {% endif %}
-                                <span class="text-black hover:text-blue-600 text-lg font-medium transition-colors duration-300">{{ user.name }}</span>
+                                <span class="nav-link text-black hover:text-blue-600 text-lg font-medium">{{ user.name }}</span>
                             </div>
-                            <div id="ownerDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden">
-                                <a href="/profile" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">Profile</a>
-                                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                            <div id="ownerDropdown" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden dropdown-enter">
+                                <a href="/profile" class="block px-4 py-2 text-sm text-black hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Profile</a>
+                                <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-200">Logout</a>
                             </div>
                         </div>
                     </li>
-    
                 {% else %}
-                    <li><a href="#" class="text-black hover:text-blue-600 text-[30px] font-bold transition-colors duration-300 font-sans" id="loginBtn">Sign In</a></li>
-                    
+                    <li><a href="#" class="nav-link text-black hover:text-blue-600 sign-in-text font-bold font-sans btn-hover" id="loginBtn">Sign In</a></li>
+                {% endif %}
+            </ul>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu" id="mobileMenu">
+            <button type="button" class="absolute top-6 right-6 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200" onclick="toggleMobileMenu()" aria-label="Close mobile menu">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <ul>
+                {% if user.is_authenticated and user.role == 'user' %}
+                    <li><a href="/" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-home w-6"></i> Home
+                    </a></li>
+                    <li><a href="/make-reservation" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-calendar-plus w-6"></i> Book Now
+                    </a></li>
+                    <li><a href="/my-reservations" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-list w-6"></i> My Reservations
+                    </a></li>
+                    <li><a href="{{ url_for('notifications.notifications') }}" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-bell w-6"></i> Notifications
+                        {% if unread_count > 0 %}
+                            <span class="ml-2 px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                        {% endif %}
+                    </a></li>
+                    <li><a href="/profile" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-user w-6"></i> Profile
+                    </a></li>
+                    <li><a href="/logout" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-sign-out-alt w-6"></i> Logout
+                    </a></li>
+                {% elif user.is_authenticated and user.role == 'owner' %}
+                    <li><a href="/dashboard" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-tachometer-alt w-6"></i> Dashboard
+                    </a></li>
+                    <li><a href="/my-cottages" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-home w-6"></i> My Cottages
+                    </a></li>
+                    <li><a href="/owner-reservations" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-calendar-check w-6"></i> Reservations
+                    </a></li>
+                    <li><a href="{{ url_for('owner.owner_notifications') }}" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-bell w-6"></i> Notifications
+                        {% if unread_count > 0 %}
+                            <span class="ml-2 px-2 py-1 text-xs font-bold text-white bg-red-600 rounded-full">{{ unread_count }}</span>
+                        {% endif %}
+                    </a></li>
+                    <li><a href="/profile" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-user w-6"></i> Profile
+                    </a></li>
+                    <li><a href="/logout" onclick="toggleMobileMenu()" class="flex items-center">
+                        <i class="fas fa-sign-out-alt w-6"></i> Logout
+                    </a></li>
+                {% else %}
+                    <li><a href="#" onclick="handleMobileLogin()" class="flex items-center">
+                        <i class="fas fa-sign-in-alt w-6"></i> Sign In
+                    </a></li>
                 {% endif %}
             </ul>
         </div>
@@ -108,21 +666,21 @@
 
     <!-- login modal-->
     <div id="loginModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-12 rounded-lg shadow-md w-[500px] border border-gray-300 relative">
-            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="closeLoginModal">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div class="bg-white p-12 rounded-lg shadow-md w-[500px] border border-gray-300 relative modal-enter">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition-colors duration-300" id="closeLoginModal">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hover:rotate-90 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Login</h2>
-            <form method="POST" action="/loginowner">
+            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Owner Login</h2>
+            <form method="POST" action="/owner/login">
                 <div class="mb-6">
                     <label for="login-email" class="block text-gray-700 text-lg font-bold mb-2">Email</label>
                     <input 
                         type="email" 
                         id="login-email" 
                         name="email" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Enter your email"
                         required
                     />
@@ -134,19 +692,19 @@
                             type="password" 
                             id="login-password" 
                             name="password" 
-                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                             placeholder="Enter your password"
                             required
                         />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" id="login-toggle-password">
-                            <i class="fas fa-eye text-gray-500 hover:text-gray-700"></i>
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer hover:text-blue-600 transition-colors duration-300" id="login-toggle-password">
+                            <i class="fas fa-eye text-gray-500"></i>
                         </span>
                     </div>
                 </div>
                 <div>
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300"
+                        class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300 btn-hover"
                     >
                         Login
                     </button>
@@ -154,325 +712,650 @@
             </form>
             <div class="mt-6 text-center">
                 <p class="text-gray-600 text-lg">
+                    <a href="#" class="text-blue-600 hover:underline font-medium btn-hover" id="forgotPasswordLink">Forgot Password?</a>
+                </p>
+                <p class="text-gray-600 text-lg">
                     Don't have an account? 
-                    <a href="#" class="text-blue-600 hover:underline font-medium" id="switchToSignup">Sign up</a>
+                    <a href="#" class="text-blue-600 hover:underline font-medium btn-hover" id="switchToSignup">Sign up</a>
                 </p>
             </div>
         </div>
     </div>
 
     <!-- Signup Modal -->
-    <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
-        <div class="bg-white p-12 rounded-lg shadow-md w-[550px] border border-gray-300 relative">
-            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="closeSignupModal">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <div id="signupModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden" 
+         data-show-modal="{% if show_signup_modal %}true{% else %}false{% endif %}">
+        <div class="bg-white p-8 rounded-lg shadow-md w-[450px] border border-gray-300 relative modal-enter">
+            <button class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 btn-hover" id="closeSignupModal">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
             </button>
-            <h2 class="text-3xl font-bold mb-8 text-center text-gray-800">Create Account</h2>
-            <form method="POST" action="/signup">
-                <div class="mb-5">
-                    <label for="signup-email" class="block text-gray-700 text-lg font-bold mb-2">Email</label>
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Create Owner Account</h2>
+            <form method="POST" action="/owner/signup">
+                <div class="mb-3">
+                    <label for="signup-email" class="block text-gray-700 text-base font-bold mb-1">Email</label>
                     <input 
                         type="email" 
                         id="signup-email" 
                         name="email" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Enter your email"
                         required
                     />
                 </div>
-                <div class="mb-5">
-                    <label for="signup-name" class="block text-gray-700 text-lg font-bold mb-2">Full Name</label>
+                <div class="mb-3">
+                    <label for="signup-name" class="block text-gray-700 text-base font-bold mb-1">Full Name</label>
                     <input 
                         type="text" 
                         id="signup-name" 
                         name="name" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Enter your full name"
                         required
                     />
                 </div>
-                <div class="mb-5">
-                    <label for="signup-username" class="block text-gray-700 text-lg font-bold mb-2">Username</label>
+                <div class="mb-3">
+                    <label for="signup-username" class="block text-gray-700 text-base font-bold mb-1">Username</label>
                     <input 
                         type="text" 
                         id="signup-username" 
                         name="username" 
-                        class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                         placeholder="Choose a username"
                         required
                     />
                 </div>
-                <div class="mb-5 relative">
-                    <label for="signup-password1" class="block text-gray-700 text-lg font-bold mb-2">Password</label>
+                <div class="mb-3 relative">
+                    <label for="signup-password1" class="block text-gray-700 text-base font-bold mb-1">Password</label>
                     <div class="relative">
                         <input 
                             type="password" 
                             id="signup-password1" 
                             name="password1" 
-                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                             placeholder="Create a password"
                             required
                         />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" id="signup-toggle-password1">
-                            <i class="fas fa-eye text-gray-500 hover:text-gray-700"></i>
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer hover:text-blue-600 transition-colors duration-300" id="signup-toggle-password1">
+                            <i class="fas fa-eye text-gray-500"></i>
                         </span>
                     </div>
                 </div>
-                <div class="mb-8 relative">
-                    <label for="signup-password2" class="block text-gray-700 text-lg font-bold mb-2">Confirm Password</label>
+                <div class="mb-4 relative">
+                    <label for="signup-password2" class="block text-gray-700 text-base font-bold mb-1">Confirm Password</label>
                     <div class="relative">
                         <input 
                             type="password" 
                             id="signup-password2" 
                             name="password2" 
-                            class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus"
                             placeholder="Confirm your password"
                             required
                         />
-                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer" id="signup-toggle-password2">
-                            <i class="fas fa-eye text-gray-500 hover:text-gray-700"></i>
+                        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer hover:text-blue-600 transition-colors duration-300" id="signup-toggle-password2">
+                            <i class="fas fa-eye text-gray-500"></i>
                         </span>
                     </div>
+                </div>
+                <div class="mb-3">
+                    <label for="security-question" class="block text-gray-700 text-base font-bold mb-1">Security Question</label>
+                    <select id="security-question" name="security_question" class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" required>
+                        <option value="">Select a question</option>
+                        <option value="mother_maiden">What is your mother's maiden name?</option>
+                        <option value="first_pet">What was your first pet's name?</option>
+                        <option value="birth_city">In what city were you born?</option>
+                        <option value="favorite_teacher">Who was your favorite teacher?</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="security-answer" class="block text-gray-700 text-base font-bold mb-1">Answer</label>
+                    <input type="text" id="security-answer" name="security_answer" class="w-full px-3 py-2 text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter your answer" required />
                 </div>
                 <div>
                     <button 
                         type="submit" 
-                        class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300"
+                        class="w-full bg-blue-600 text-white py-2 px-4 text-base rounded-md hover:bg-blue-700 transition duration-300 btn-hover"
                     >
                         Sign Up
                     </button>
                 </div>
             </form>
-            <div class="mt-6 text-center">
-                <p class="text-gray-600 text-lg">
+            <div class="mt-4 text-center">
+                <p class="text-gray-600 text-sm">
                     Already have an account? 
-                    <a href="#" class="text-blue-600 hover:underline font-medium" id="switchToLogin">Login</a>
+                    <a href="#" class="text-blue-600 hover:underline font-medium transition-colors duration-300" id="switchToLogin">Login</a>
                 </p>
             </div>
         </div>
     </div>
 
-    <div class="container w-[300px] h-[100px] mx-auto absolute bottom-[10px] left-40 transform -translate-x-1/2 mt-px">
+    <!-- Forgot Password Modal -->
+    <div id="forgotPasswordModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-10 rounded-lg shadow-md w-[500px] border border-gray-300 relative modal-enter">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700 btn-hover" id="closeForgotPasswordModal">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+            <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Forgot Password</h2>
+            <form method="POST" action="/owner/forgot_password" id="forgotPasswordForm">
+                <div class="mb-4">
+                    <label for="forgot-email" class="block text-gray-700 text-lg font-bold mb-2">Email</label>
+                    <input type="email" id="forgot-email" name="email" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter your email" required />
+                </div>
+                <div class="mb-4 flex items-center">
+                    <button type="button" id="findQuestionBtn" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-300 btn-hover">Find Question</button>
+                </div>
+                <div class="mb-4" id="security-question-group" style="display:none;">
+                    <label for="forgot-security-question" class="block text-gray-700 text-lg font-bold mb-2">Security Question</label>
+                    <input type="text" id="forgot-security-question" name="security_question" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md bg-gray-100" readonly />
+                </div>
+                <div class="mb-4" id="security-answer-group" style="display:none;">
+                    <label for="forgot-security-answer" class="block text-gray-700 text-lg font-bold mb-2">Answer</label>
+                    <input type="text" id="forgot-security-answer" name="security_answer" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter your answer" required />
+                </div>
+                <div class="mb-6" id="new-password-group" style="display:none;">
+                    <label for="new-password" class="block text-gray-700 text-lg font-bold mb-2">New Password</label>
+                    <input type="password" id="new-password" name="new_password" class="w-full px-4 py-3 text-lg border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 input-focus" placeholder="Enter new password" required />
+                </div>
+                <div id="reset-btn-group" style="display:none;">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-3 px-4 text-lg rounded-md hover:bg-blue-700 transition duration-300 btn-hover">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="fixed bottom-10 left-1/2 transform -translate-x-1/2 w-80">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div class="mt-4 space-y-4">
+            <div class="space-y-4 animate-fade-in">
                 {% for category, message in messages %}
-                    <div class="alert {% if category == 'error' %}bg-red-100 text-red-500 border border-red-400
-                    {% elif category == 'success' %}bg-green-100 text-green-500 border border-green-400
-                    {% endif %} rounded p-4 flex items-center" role="alert">
-                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                            <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.066V18a2 2 0 01-2 2H4a2 2 0 01-2-2V6.066c0-.436.055-.84.166-1.322z" clip-rule="evenodd"></path>
-                        </svg>
-                        <span class="font-medium">{{ message }}</span>
-                        <button type="button" class="close ml-auto" data-bs-dismiss="alert" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
+                    <div class="flash-message flex items-center p-4 rounded-xl shadow-2xl relative overflow-hidden backdrop-blur-sm 
+                        {% if category == 'error' %}
+                            bg-red-50/90 border border-red-300 text-red-700
+                        {% elif category == 'success' %}
+                            bg-green-50/90 border border-green-300 text-green-700
+                        {% else %}
+                            bg-blue-50/90 border border-blue-300 text-blue-700
+                        {% endif %}">
+                        
+                        <!-- Animated background accent -->
+                        <div class="absolute inset-0 opacity-20">
+                            <div class="absolute inset-0 
+                            {% if category == 'error' %}
+                                bg-gradient-to-r from-red-300 to-red-500
+                            {% elif category == 'success' %}
+                                bg-gradient-to-r from-green-300 to-green-500
+                            {% else %}
+                                bg-gradient-to-r from-blue-300 to-blue-500
+                            {% endif %}
+                            animate-pulse"></div>
+                        </div>
+                        
+                        <div class="flex-shrink-0 z-10">
+                            {% if category == 'error' %}
+                            <svg class="h-6 w-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            {% elif category == 'success' %}
+                            <svg class="h-6 w-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                            {% else %}
+                            <svg class="h-6 w-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="ml-3 text-sm font-medium z-10 flex-grow">
+                            {{ message }}
+                        </div>
+                        
+                        <button type="button" class="ml-auto inline-flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 rounded-full p-1 close z-10 transition-transform hover:rotate-90 duration-300">
+                            <svg class="h-5 w-5" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
                         </button>
                     </div>
                 {% endfor %}
             </div>
-            <script>
-                var closebtns = document.getElementsByClassName("close");
-                var i;
-
-                for (i = 0; i < closebtns.length; i++) {
-                    closebtns[i].addEventListener("click", function() {
-                        this.parentElement.style.display = 'none';
-                    });
+    
+            <style>
+                @keyframes slideUp {
+                    from { transform: translateY(100%); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
                 }
-                setTimeout(function() {
-                    var alerts = document.getElementsByClassName("alert");
-                    for (i = 0; i < alerts.length; i++) {
-                        alerts[i].style.display = 'none';
+                
+                @keyframes slideDown {
+                    from { transform: translateY(0); opacity: 1; }
+                    to { transform: translateY(20px); opacity: 0; }
+                }
+                
+                .animate-fade-in {
+                    animation: slideUp 0.4s ease-out forwards;
+                }
+                
+                .animate-fade-out {
+                    animation: slideDown 0.3s ease-in forwards;
+                }
+                
+                .flash-message {
+                    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.05);
+                    transition: all 0.3s ease;
+                }
+                
+                .flash-message:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15), 0 10px 15px -5px rgba(0, 0, 0, 0.1);
+                }
+            </style>
+    
+            <script>
+                // Function to remove a flash message with animation
+                function removeMessage(element) {
+                    element.classList.add('animate-fade-out');
+                    setTimeout(() => {
+                        element.style.height = element.offsetHeight + 'px';
+                        element.style.marginTop = '0';
+                        element.style.marginBottom = '0';
+                        
+                        setTimeout(() => {
+                            element.style.height = '0';
+                            element.style.marginTop = '0';
+                            element.style.marginBottom = '0';
+                            element.style.padding = '0';
+                            element.style.opacity = '0';
+                            
+                            setTimeout(() => {
+                                if (element.parentNode) {
+                                    element.parentNode.removeChild(element);
+                                }
+                            }, 300);
+                        }, 50);
+                    }, 250);
+                }
+                
+                // Setup close buttons
+                document.addEventListener('DOMContentLoaded', function() {
+                    const closeButtons = document.querySelectorAll('.close');
+                    closeButtons.forEach(button => {
+                        button.addEventListener('click', function() {
+                            const message = this.closest('.flash-message');
+                            removeMessage(message);
+                        });
+                    });
+                    
+                    // Auto-hide after 5 seconds
+                    const messages = document.querySelectorAll('.flash-message');
+                    messages.forEach(message => {
+                        // Add progress bar
+                        const progressBar = document.createElement('div');
+                        progressBar.className = 'absolute bottom-0 left-0 h-1 bg-gray-400/30';
+                        progressBar.style.width = '100%';
+                        progressBar.style.animation = 'shrinkWidth 5s linear forwards';
+                        message.appendChild(progressBar);
+                        
+                        // Auto dismiss after delay
+                        setTimeout(() => {
+                            removeMessage(message);
+                        }, 5000);
+                    });
+                });
+                
+                // Add keyframe animation for progress bar
+                const styleSheet = document.createElement('style');
+                styleSheet.textContent = `
+                    @keyframes shrinkWidth {
+                        from { width: 100%; }
+                        to { width: 0%; }
                     }
-                }, 3000);
+                `;
+                document.head.appendChild(styleSheet);
             </script>
         {% endif %}
         {% endwith %}
     </div>
+    
+    <style>
+    @keyframes slide-up {
+        0% {
+            transform: translate(-50%, 50%);
+            opacity: 0;
+        }
+        100% {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+    }
+    
+    .animate-slide-up {
+        animation: slide-up 0.5s ease-out;
+    }
+    </style>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Navbar scroll handling
+            // Enhanced navbar scroll handling with smooth transitions
+            let lastScroll = 0;
+            const navbar = document.getElementById('navbar');
+            
             window.addEventListener('scroll', function() {
-                const navbar = document.getElementById('navbar');
-                const navText = document.getElementById('navText');
-                const navLinks = document.querySelectorAll('nav a');
+                const currentScroll = window.pageYOffset;
                 
-                if (window.scrollY > 100) {
-                    navbar.classList.add('bg-white');
-                    navbar.classList.add('shadow-md');
-                    
-                    navLinks.forEach(link => {
-                        link.style.color = '#1f2937'; // text-gray-800
-                    });
+                if (currentScroll <= 0) {
+                    navbar.classList.remove('bg-white', 'shadow-md');
+                    navbar.style.transform = 'translateY(0)';
+                } else if (currentScroll > lastScroll) {
+                    // Scrolling down
+                    navbar.style.transform = 'translateY(-100%)';
                 } else {
-                    navbar.classList.remove('bg-white');
-                    navbar.classList.remove('shadow-md');
-                    
-                    navLinks.forEach(link => {
-                        link.style.color = 'black';
-                    });
+                    // Scrolling up
+                    navbar.classList.add('bg-white', 'shadow-md');
+                    navbar.style.transform = 'translateY(0)';
                 }
+                
+                lastScroll = currentScroll;
             });
 
             // Modal handling
             const loginModal = document.getElementById('loginModal');
             const signupModal = document.getElementById('signupModal');
             const loginBtn = document.getElementById('loginBtn');
-            const signupBtn = document.getElementById('signupBtn');
             const closeLoginModal = document.getElementById('closeLoginModal');
             const closeSignupModal = document.getElementById('closeSignupModal');
             const switchToSignup = document.getElementById('switchToSignup');
             const switchToLogin = document.getElementById('switchToLogin');
             
+            function showModal(modal) {
+                if (modal) {
+                    modal.classList.remove('hidden');
+                    modal.querySelector('div').classList.add('modal-enter');
+                    // Prevent body scroll when modal is open
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            function hideModal(modal) {
+                if (modal) {
+                    modal.querySelector('div').classList.add('modal-exit');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.querySelector('div').classList.remove('modal-exit');
+                        // Restore body scroll when modal is closed
+                        document.body.style.overflow = '';
+                    }, 300);
+                }
+            }
+
+            // Initialize modals based on server-side state
+            if (signupModal && signupModal.dataset.showModal === 'true') {
+                showModal(signupModal);
+            }
+
             if (loginBtn) {
                 loginBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    loginModal.classList.remove('hidden');
-                });
-            }
-            
-            if (signupBtn) {
-                signupBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    signupModal.classList.remove('hidden');
+                    showModal(loginModal);
                 });
             }
             
             if (closeLoginModal) {
                 closeLoginModal.addEventListener('click', function() {
-                    loginModal.classList.add('hidden');
+                    hideModal(loginModal);
                 });
             }
             
             if (closeSignupModal) {
                 closeSignupModal.addEventListener('click', function() {
-                    signupModal.classList.add('hidden');
+                    hideModal(signupModal);
                 });
             }
             
             if (switchToSignup) {
                 switchToSignup.addEventListener('click', function(e) {
                     e.preventDefault();
-                    loginModal.classList.add('hidden');
-                    signupModal.classList.remove('hidden');
+                    hideModal(loginModal);
+                    setTimeout(() => showModal(signupModal), 300);
                 });
             }
             
             if (switchToLogin) {
                 switchToLogin.addEventListener('click', function(e) {
                     e.preventDefault();
-                    signupModal.classList.add('hidden');
-                    loginModal.classList.remove('hidden');
+                    hideModal(signupModal);
+                    setTimeout(() => showModal(loginModal), 300);
                 });
             }
-            
-            // Toggle password visibility for login
-            const loginTogglePassword = document.getElementById('login-toggle-password');
-            const loginPassword = document.getElementById('login-password');
-            
-            if (loginTogglePassword && loginPassword) {
-                loginTogglePassword.addEventListener('click', function() {
-                    const type = loginPassword.getAttribute('type') === 'password' ? 'text' : 'password';
-                    loginPassword.setAttribute('type', type);
-                    
-                    // Toggle eye icon
-                    const eyeIcon = this.querySelector('i');
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
+
+            // Enhanced password toggle functionality
+            function setupPasswordToggle(toggleId, passwordId) {
+                const toggle = document.getElementById(toggleId);
+                const password = document.getElementById(passwordId);
+                
+                if (toggle && password) {
+                    toggle.addEventListener('click', function() {
+                        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+                        password.setAttribute('type', type);
+                        
+                        const eyeIcon = this.querySelector('i');
+                        eyeIcon.classList.toggle('fa-eye');
+                        eyeIcon.classList.toggle('fa-eye-slash');
+                    });
+                }
             }
             
-            // Toggle password visibility for signup (first password field)
-            const signupTogglePassword1 = document.getElementById('signup-toggle-password1');
-            const signupPassword1 = document.getElementById('signup-password1');
-            
-            if (signupTogglePassword1 && signupPassword1) {
-                signupTogglePassword1.addEventListener('click', function() {
-                    const type = signupPassword1.getAttribute('type') === 'password' ? 'text' : 'password';
-                    signupPassword1.setAttribute('type', type);
-                    
-                    // Toggle eye icon
-                    const eyeIcon = this.querySelector('i');
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
+            setupPasswordToggle('login-toggle-password', 'login-password');
+            setupPasswordToggle('signup-toggle-password1', 'signup-password1');
+            setupPasswordToggle('signup-toggle-password2', 'signup-password2');
+
+            // Enhanced dropdown handling
+            function toggleDropdown(dropdownId) {
+                const dropdown = document.getElementById(dropdownId);
+                if (dropdown) {
+                    dropdown.classList.toggle('hidden');
+                    if (!dropdown.classList.contains('hidden')) {
+                        dropdown.classList.add('dropdown-enter');
+                    }
+                }
             }
-            
-            // Toggle password visibility for signup (confirm password field)
-            const signupTogglePassword2 = document.getElementById('signup-toggle-password2');
-            const signupPassword2 = document.getElementById('signup-password2');
-            
-            if (signupTogglePassword2 && signupPassword2) {
-                signupTogglePassword2.addEventListener('click', function() {
-                    const type = signupPassword2.getAttribute('type') === 'password' ? 'text' : 'password';
-                    signupPassword2.setAttribute('type', type);
-                    
-                    // Toggle eye icon
-                    const eyeIcon = this.querySelector('i');
-                    eyeIcon.classList.toggle('fa-eye');
-                    eyeIcon.classList.toggle('fa-eye-slash');
-                });
+
+            window.toggleUserDropdown = function() {
+                toggleDropdown('userDropdown');
             }
-            
+
+            window.toggleOwnerDropdown = function() {
+                toggleDropdown('ownerDropdown');
+            }
+
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                const userDropdown = document.getElementById('userDropdown');
+                const ownerDropdown = document.getElementById('ownerDropdown');
+                
+                if (userDropdown && !userDropdown.classList.contains('hidden')) {
+                    if (!event.target.closest('[onclick="toggleUserDropdown()"]')) {
+                        userDropdown.classList.add('dropdown-exit');
+                        setTimeout(() => {
+                            userDropdown.classList.add('hidden');
+                            userDropdown.classList.remove('dropdown-exit');
+                        }, 200);
+                    }
+                }
+                
+                if (ownerDropdown && !ownerDropdown.classList.contains('hidden')) {
+                    if (!event.target.closest('[onclick="toggleOwnerDropdown()"]')) {
+                        ownerDropdown.classList.add('dropdown-exit');
+                        setTimeout(() => {
+                            ownerDropdown.classList.add('hidden');
+                            ownerDropdown.classList.remove('dropdown-exit');
+                        }, 200);
+                    }
+                }
+            });
+
             // Close modals when clicking outside
             window.addEventListener('click', function(e) {
                 if (e.target === loginModal) {
-                    loginModal.classList.add('hidden');
+                    hideModal(loginModal);
                 }
                 if (e.target === signupModal) {
-                    signupModal.classList.add('hidden');
+                    hideModal(signupModal);
                 }
             });
             
             // Close modals with Escape key
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
-                    loginModal.classList.add('hidden');
-                    signupModal.classList.add('hidden');
+                    hideModal(loginModal);
+                    hideModal(signupModal);
                 }
+            });
+
+            // Forgot Password Modal logic
+            const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+            const closeForgotPasswordModal = document.getElementById('closeForgotPasswordModal');
+            const findQuestionBtn = document.getElementById('findQuestionBtn');
+            const emailInput = document.getElementById('forgot-email');
+            const questionGroup = document.getElementById('security-question-group');
+            const answerGroup = document.getElementById('security-answer-group');
+            const newPasswordGroup = document.getElementById('new-password-group');
+            const resetBtnGroup = document.getElementById('reset-btn-group');
+            const questionInput = document.getElementById('forgot-security-question');
+
+            if (forgotPasswordLink && forgotPasswordModal) {
+                forgotPasswordLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    forgotPasswordModal.classList.remove('hidden');
+                });
+            }
+            if (closeForgotPasswordModal && forgotPasswordModal) {
+                closeForgotPasswordModal.addEventListener('click', function() {
+                    forgotPasswordModal.classList.add('hidden');
+                });
+            }
+
+            findQuestionBtn.addEventListener('click', function() {
+                const email = emailInput.value.trim();
+                if (!email) {
+                    alert('Please enter your email first.');
+                    return;
+                }
+                fetch(`/get_security_question?email=${encodeURIComponent(email)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            questionInput.value = data.question;
+                            questionGroup.style.display = '';
+                            answerGroup.style.display = '';
+                            newPasswordGroup.style.display = '';
+                            resetBtnGroup.style.display = '';
+                        } else {
+                            questionInput.value = '';
+                            questionGroup.style.display = 'none';
+                            answerGroup.style.display = 'none';
+                            newPasswordGroup.style.display = 'none';
+                            resetBtnGroup.style.display = 'none';
+                            alert(data.message || 'No security question found for this email.');
+                        }
+                    })
+                    .catch(() => {
+                        alert('Error fetching security question.');
+                    });
             });
         });
 
-        // New dropdown toggle functions for user and owner profile sections
-        function toggleUserDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('hidden');
-        }
-
-        function toggleOwnerDropdown() {
-            const dropdown = document.getElementById('ownerDropdown');
-            dropdown.classList.toggle('hidden');
-        }
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', function(event) {
-            const userDropdown = document.getElementById('userDropdown');
-            const ownerDropdown = document.getElementById('ownerDropdown');
+        function toggleMobileMenu() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const body = document.body;
+            const html = document.documentElement;
             
-            // Check if user dropdown exists and is open
-            if (userDropdown && !userDropdown.classList.contains('hidden')) {
+            if (mobileMenu.classList.contains('active')) {
+                mobileMenu.classList.remove('active');
+                mobileMenuButton.classList.remove('active');
+                body.style.overflow = '';
+                html.style.overflow = '';
                 
-                const userToggle = document.querySelector('[onclick="toggleUserDropdown()"]');
-                if (!event.target.closest('[onclick="toggleUserDropdown()"]') && 
-                    !event.target.closest('#userDropdown')) {
-                    userDropdown.classList.add('hidden');
-                }
+                // Show logo and nav with delay
+                setTimeout(() => {
+                    document.querySelector('.logo-container').style.opacity = '1';
+                    document.querySelector('.logo-container').style.visibility = 'visible';
+                    document.querySelector('.desktop-nav').style.opacity = '1';
+                    document.querySelector('.desktop-nav').style.visibility = 'visible';
+                }, 300);
+            } else {
+                mobileMenu.classList.add('active');
+                mobileMenuButton.classList.add('active');
+                body.style.overflow = 'hidden';
+                html.style.overflow = 'hidden';
+                
+                // Hide logo and nav immediately
+                document.querySelector('.logo-container').style.opacity = '0';
+                document.querySelector('.logo-container').style.visibility = 'hidden';
+                document.querySelector('.desktop-nav').style.opacity = '0';
+                document.querySelector('.desktop-nav').style.visibility = 'hidden';
             }
+        }
+
+        function handleMobileLogin() {
+            toggleMobileMenu();
+            const loginModal = document.getElementById('loginModal');
+            if (loginModal) {
+                loginModal.classList.remove('hidden');
+                loginModal.querySelector('div').classList.add('modal-enter');
+                // Focus the first input
+                setTimeout(() => {
+                    const firstInput = loginModal.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }, 300);
+            }
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
             
-            // Check if owner dropdown exists and is open
-            if (ownerDropdown && !ownerDropdown.classList.contains('hidden')) {
-                // Check if click is outside the dropdown and its toggle button
-                if (!event.target.closest('[onclick="toggleOwnerDropdown()"]') && 
-                    !event.target.closest('#ownerDropdown')) {
-                    ownerDropdown.classList.add('hidden');
+            if (mobileMenu && mobileMenu.classList.contains('active') && 
+                !mobileMenu.contains(event.target) && 
+                !mobileMenuButton.contains(event.target)) {
+                toggleMobileMenu();
+            }
+        });
+
+        // Close mobile menu on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const mobileMenu = document.getElementById('mobileMenu');
+                if (mobileMenu && mobileMenu.classList.contains('active')) {
+                    toggleMobileMenu();
                 }
             }
         });
 
-        
+        // Prevent body scroll when mobile menu is open
+        document.addEventListener('touchmove', function(event) {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu && mobileMenu.classList.contains('active')) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        // Handle orientation changes
+        window.addEventListener('orientationchange', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            if (mobileMenu && mobileMenu.classList.contains('active')) {
+                // Close menu on orientation change
+                toggleMobileMenu();
+            }
+        });
     </script>
 
 <script src="{{ url_for('static', filename='cottage_modals.js') }}"></script>

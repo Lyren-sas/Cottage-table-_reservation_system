@@ -195,66 +195,67 @@ def get_table_details(table_id):
         conn.close()
 
 
-@make_reservation_bp.route('/check-availability')
-@login_required
+@make_reservation_bp.route('/check_availability', methods=['GET'])
 def check_availability():
-    cottage_id = request.args.get('cottage_id')
-    date_stay = request.args.get('date')
-    start_time = request.args.get('start_time')
-    end_time = request.args.get('end_time')
-    
-    if not cottage_id or not date_stay:
-        return jsonify({'success': False, 'message': 'Missing required parameters'})
-    
-    conn = get_db_connection()
     try:
-        cursor = conn.cursor()
+        cottage_id = request.args.get('cottage_id')
+        date = request.args.get('date')
+        start_time = request.args.get('start_time')
+        end_time = request.args.get('end_time')
         
-        # Check if cottage is available for the selected date
-        # Modified to include "paid_online" and "pay_onsite" in status check
-        cursor.execute('''
-            SELECT * FROM reservations 
-            WHERE cottage_id = ? 
-            AND date_stay = ? 
-            AND cottage_status IN ("approved", "pending", "paid_online", "pay_onsite")
-        ''', (cottage_id, date_stay))
+        if not all([cottage_id, date]):
+            return jsonify({'success': False, 'message': 'Missing required parameters'})
         
-        existing_reservations = cursor.fetchall()
+        # Get current date and time
+        current_datetime = datetime.now()
+        current_date = current_datetime.strftime('%Y-%m-%d')
+        current_time = current_datetime.strftime('%H:%M')
         
-        # If no time provided, just check date availability
-        if not start_time or not end_time:
-            return jsonify({
-                'success': True,
-                'available': len(existing_reservations) == 0
-            })
+        # Convert input date to datetime for comparison
+        input_date = datetime.strptime(date, '%Y-%m-%d').date()
         
-        # Check for time conflicts
-        if existing_reservations:
-            cursor.execute('''
-                SELECT * FROM reservations 
-                WHERE cottage_id = ? 
-                AND date_stay = ? 
-                AND cottage_status IN ("approved", "pending", "paid_online", "pay_onsite")
-                AND NOT (
-                    (start_time >= ?) OR (end_time <= ?)
-                )
-            ''', (cottage_id, date_stay, end_time, start_time))
-            
-            time_conflicts = cursor.fetchall()
-            return jsonify({
-                'success': True,
-                'available': len(time_conflicts) == 0
-            })
+        # If booking is for today, check if the time has passed
+        if date == current_date and start_time:
+            # Convert times to 24-hour format for comparison
+            try:
+                # Handle both 12-hour and 24-hour formats
+                if ':' in start_time and ' ' in start_time:  # 12-hour format
+                    start_time_24 = datetime.strptime(start_time, '%I:%M %p').strftime('%H:%M')
+                else:  # 24-hour format
+                    start_time_24 = start_time
+                
+                if start_time_24 < current_time:
+                    return jsonify({
+                        'success': False,
+                        'available': False,
+                        'message': f'Cannot book a time slot that has already passed. Current time is {current_time}'
+                    })
+            except ValueError as e:
+                return jsonify({
+                    'success': False,
+                    'message': f'Invalid time format: {str(e)}'
+                })
+        
+        # Check for existing reservations
+        existing_reservation = Reservation.query.filter(
+            Reservation.cottage_id == cottage_id,
+            Reservation.date_stay == date,
+            Reservation.status != 'cancelled',
+            (
+                (Reservation.start_time <= start_time and Reservation.end_time > start_time) or
+                (Reservation.start_time < end_time and Reservation.end_time >= end_time) or
+                (Reservation.start_time >= start_time and Reservation.end_time <= end_time)
+            )
+        ).first()
         
         return jsonify({
             'success': True,
-            'available': True
+            'available': existing_reservation is None,
+            'message': 'Time slot is available' if existing_reservation is None else 'Time slot conflicts with existing reservation'
         })
         
     except Exception as e:
         return jsonify({'success': False, 'message': str(e)})
-    finally:
-        conn.close()
 
 @make_reservation_bp.route('/get-cottage-tables')
 @login_required
@@ -526,23 +527,19 @@ def create_reservation(conn, cottage_id, table_id, date_stay, start_time, end_ti
 @login_required
 def cottage_reviews(cottage_id):
     """Return JSON list of reviews (with user profile) for a given cottage."""
-    # Log access to this endpoint
-    print(f"Accessing cottage reviews for cottage ID: {cottage_id}")
-    
     conn = get_db_connection()
     conn.row_factory = sqlite3.Row
     
     try:
         cur = conn.cursor()
-        print("Executing SQL query for reviews...")
         
         cur.execute('''
             SELECT
-              r.rating_value,
-              r.comments,
-              r.created_at,
-              u.name       AS reviewer_name,
-              u.user_image AS reviewer_image
+                r.rating_value,
+                r.comments,
+                r.created_at,
+                u.name AS user_name,
+                u.user_image AS user_image
             FROM ratings r
             JOIN users u ON r.user_id = u.id
             WHERE r.cottage_id = ?
@@ -550,40 +547,26 @@ def cottage_reviews(cottage_id):
         ''', (cottage_id,))
         
         rows = cur.fetchall()
-        print(f"Found {len(rows)} reviews for cottage ID {cottage_id}")
         
         reviews = []
         for row in rows:
-            # Handle the user_image encoding properly
-            img_data = None
-            if row['reviewer_image']:
-                # Check if reviewer_image is already bytes, otherwise convert it
-                if isinstance(row['reviewer_image'], bytes):
-                    img_bytes = row['reviewer_image']
+            # Handle user image
+            user_image = None
+            if row['user_image']:
+                if isinstance(row['user_image'], bytes):
+                    user_image = base64.b64encode(row['user_image']).decode('ascii')
                 else:
-                    # If it's a string path to an image, we'll skip base64 encoding
-                    img_data = row['reviewer_image']
-                    img_bytes = None
-                
-                # Only base64 encode if we have actual image bytes
-                if img_bytes:
-                    try:
-                        img_data = base64.b64encode(img_bytes).decode('ascii')
-                    except TypeError as e:
-                        print(f"Error encoding image: {e}")
-                        img_data = None
+                    user_image = row['user_image']
 
             review_data = {
-                'rating_value': row['rating_value'],
-                'comments':     row['comments'],
-                'created_at':   row['created_at'],
-                'name':         row['reviewer_name'],
-                'image_b64':    img_data
+                'rating': row['rating_value'],
+                'comment': row['comments'],
+                'date_created': row['created_at'],
+                'user_name': row['user_name'],
+                'user_image': user_image
             }
             reviews.append(review_data)
-            print(f"Processed review: {review_data['name']}, Rating: {review_data['rating_value']}")
 
-        print(f"Returning {len(reviews)} reviews as JSON")
         return jsonify(success=True, reviews=reviews)
 
     except Exception as e:

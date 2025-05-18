@@ -22,6 +22,7 @@ def my_reservations():
     past_reservations = []
     completed_reservations = []
     canceled_reservations = []
+    upcoming_reservations = []  # New list for upcoming reservations
 
     try:
         cursor = conn.cursor()
@@ -99,13 +100,15 @@ def my_reservations():
             elif days_until > 7:
                 reservation.can_cancel = now < stay_date - timedelta(days=3)
 
-            # Categorize
+            # Categorize reservations
             if reservation.cottage_status == 'pending':
                 current_reservations.append(reservation)
             elif reservation.cottage_status == 'approved':
                 approved_reservations.append(reservation)
+                upcoming_reservations.append(reservation)  # Add to upcoming
             elif reservation.cottage_status in ['paid_online', 'pay_onsite']:
                 reserved_reservations.append(reservation)
+                upcoming_reservations.append(reservation)  # Add to upcoming
             elif reservation.cottage_status in ['completed', 'done']:
                 completed_reservations.append(reservation)
             elif reservation.cottage_status in ['canceled', 'declined']:
@@ -126,7 +129,8 @@ def my_reservations():
                            reserved_reservations=reserved_reservations,
                            past_reservations=past_reservations,
                            completed_reservations=completed_reservations,
-                           canceled_reservations=canceled_reservations)
+                           canceled_reservations=canceled_reservations,
+                           upcoming_reservations=upcoming_reservations)  # Add to template context
 
 
 @my_reservation.route('/cancel-reservation', methods=['POST'])
@@ -402,80 +406,48 @@ def payment_receipt(payment_id):
 
 def update_completed_reservations():
     """
-    Update reservation status to 'completed' when the date_stay has passed and end_time has reached
+    Update reservation status to 'completed' when the date_stay and end_time have passed
+    Only for paid_online or pay_onsite status.
     """
     conn = get_db_connection()
     try:
         cursor = conn.cursor()
         now = datetime.now()
-        today = now.date().strftime('%Y-%m-%d')
-        current_datetime = now.strftime('%Y-%m-%d %H:%M:%S')
-        
-        # Find reservations where date_stay is before today and end_time is before now and status is not already completed/canceled
+        today = now.date()
+        current_time = now.time()
+        affected_rows = 0
+
+        # 1. Complete all reservations with date_stay < today and correct status
         cursor.execute('''
             UPDATE reservations
             SET cottage_status = 'completed', date_completed = ?
             WHERE date_stay < ?
-            AND end_time < ?
-            AND cottage_status IN ('paid_online', 'onsite-payment')
-        ''', (current_datetime, today, current_datetime))
-        
-        affected_rows = cursor.rowcount
-        conn.commit()
-        
-        print(f"Updated {affected_rows} reservations to 'completed' status")
-        return affected_rows
-        
-    except Exception as e:
-        conn.rollback()
-        print(f"Error updating completed reservations: {str(e)}")
-        return 0
-    finally:
-        if conn:
-            conn.close()
+            AND cottage_status IN ('paid_online', 'pay_onsite')
+        ''', (now.strftime('%Y-%m-%d %H:%M:%S'), today.strftime('%Y-%m-%d')))
+        affected_rows += cursor.rowcount
 
-# Add a route that can be called manually or by a scheduler
-@my_reservation.route('/update-completed-reservations', methods=['GET'])
-@login_required
-def trigger_update_completed_reservations():
-    """Admin route to manually trigger the update of completed reservations"""
-    # Check if user is admin (you can modify this according to your authentication system)
-    if not current_user.is_authenticated or current_user.role == 'owner':
-        flash('You do not have permission to perform this action.', 'error')
-        return redirect(url_for('my_reservations.my_reservations'))
-    
-    count = update_completed_reservations()
-    flash(f'Successfully updated {count} reservations to completed status.', 'success')
-    return redirect(url_for('my_reservation.my_reservations'))
-
-def update_completed_reservations():
-    """
-    Update reservation status to 'completed' when the date_stay and end_time have passed
-    """
-    conn = get_db_connection()
-    try:
-        cursor = conn.cursor()
-        now = datetime.now()
-        today = now.date().strftime('%Y-%m-%d')
-        current_time = now.strftime('%H:%M')
-        
-        # Find reservations where:
-        # 1. date_stay is in the past OR
-        # 2. date_stay is today AND end_time has passed
-        # AND status is an active reservation status
+        # 2. For today, only complete if end_time has passed and correct status
         cursor.execute('''
-            UPDATE reservations
-            SET cottage_status = 'completed', date_completed = ?
-            WHERE (date_stay < ? OR (date_stay = ? AND end_time < ?))
-            AND cottage_status IN ('paid_online', 'pay_onsite', 'reserved', 'approved')
-        ''', (now.strftime('%Y-%m-%d %H:%M:%S'), today, today, current_time))
-        
-        affected_rows = cursor.rowcount
+            SELECT id, end_time FROM reservations
+            WHERE date_stay = ?
+            AND cottage_status IN ('paid_online', 'pay_onsite')
+        ''', (today.strftime('%Y-%m-%d'),))
+        for row in cursor.fetchall():
+            try:
+                end_time_obj = datetime.strptime(row['end_time'], '%I:%M %p').time()
+                if current_time >= end_time_obj:
+                    cursor.execute('''
+                        UPDATE reservations
+                        SET cottage_status = 'completed', date_completed = ?
+                        WHERE id = ?
+                    ''', (now.strftime('%Y-%m-%d %H:%M:%S'), row['id']))
+                    affected_rows += cursor.rowcount
+            except Exception as e:
+                print(f"Error parsing end_time for reservation {row['id']}: {e}")
+
         conn.commit()
-        
         print(f"{now.strftime('%Y-%m-%d %H:%M:%S')} - Updated {affected_rows} reservations to 'completed' status")
         return affected_rows
-        
     except Exception as e:
         conn.rollback()
         print(f"Error updating completed reservations: {str(e)}")
@@ -484,7 +456,7 @@ def update_completed_reservations():
         if conn:
             conn.close()
 
-# Schedule the job to run every hour
+# Schedule the job to run more frequently (every 5 minutes) to ensure timely updates
 @my_reservation.record_once
 def configure_scheduler(state):
     """Initialize the scheduler when the Flask app starts"""
@@ -492,7 +464,7 @@ def configure_scheduler(state):
         scheduler.add_job(
             update_completed_reservations,
             'interval',
-            minutes=60,  # Run every hour
+            minutes=2,  # Run every 5 minutes for more timely updates
             id='update_reservations_job',
             replace_existing=True
         )

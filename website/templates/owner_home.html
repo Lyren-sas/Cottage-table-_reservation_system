@@ -1,6 +1,6 @@
 {% extends 'ownerbase.html' %}
 
-{% block title %}Home - Balugan Cottage{% endblock %}
+{% block title %}Home - Norzagaray Cottage{% endblock %}
 
 {% block content %}
 <div class="relative w-full h-screen">
@@ -9,9 +9,9 @@
         {% set images = [
             {'src': 'static/uploads/1st.jpg', 'alt': 'Cottage 1'},
             {'src': 'static/uploads/2nd.jpg', 'alt': 'Cottage 2'},
-            {'src': 'static/uploads/1st.jpg', 'alt': 'Cottage 3'},
-            {'src': 'static/uploads/2nd.jpg', 'alt': 'Cottage 4'},
-            {'src': 'static/uploads/1st.jpg', 'alt': 'Cottage 5'}
+            {'src': 'static/uploads/2.png', 'alt': 'Cottage 3'},
+            {'src': 'static/uploads/18.jpg', 'alt': 'Cottage 4'},
+            {'src': 'static/uploads/17.jpg', 'alt': 'Cottage 5'}
         ] %}
         {% for image in images %}
         <div class="slideshow-slide fade h-full">
@@ -21,11 +21,40 @@
         
         <!-- Overlay text -->
         <div class="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-40 text-white">
-            <h1 class="text-5xl font-bold mb-4 text-center">Welcome to Norzagaray River Cottage</h1>
-            <p class="text-xl mb-8 max-w-2xl text-center">Escape to paradise and experience the vibes in Norzagaray river</p>
-            <button onclick="window.location.href='/owner/dashboard'" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300">
-                Manage Cottages
-            </button>
+            <div class="text-center text-white backdrop-blur-sm bg-black bg-opacity-30 p-10 rounded-2xl max-w-3xl mx-4 border border-white border-opacity-20 shadow-2xl">
+                <h1 class="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 drop-shadow-lg">
+                    <span class="block">Welcome, Owner</span>
+                    <span class="block text-yellow-300">Norzagaray River Cottage</span>
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto">Manage your cottages, view reservations, and handle bookings all in one place.</p>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <button onclick="document.getElementById('loginModal').classList.remove('hidden')" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-4 px-10 rounded-full transition duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-home mr-2"></i>
+                        Manage Cottages
+                    </button>
+                    <a href="tel:+639123456789" class="bg-transparent border-2 border-white text-white font-bold py-4 px-10 rounded-full transition duration-300 hover:bg-white hover:text-blue-900 flex items-center gap-2">
+                        <i class="fas fa-phone"></i>
+                        09123456789
+                    </a>
+                </div>
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                        <i class="fas fa-calendar-check text-3xl text-yellow-300 mb-2"></i>
+                        <h3 class="text-lg font-semibold">Reservations</h3>
+                        <p class="text-sm">View and manage bookings</p>
+                    </div>
+                    <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                        <i class="fas fa-chart-line text-3xl text-yellow-300 mb-2"></i>
+                        <h3 class="text-lg font-semibold">Analytics</h3>
+                        <p class="text-sm">Track your business growth</p>
+                    </div>
+                    <div class="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+                        <i class="fas fa-cog text-3xl text-yellow-300 mb-2"></i>
+                        <h3 class="text-lg font-semibold">Settings</h3>
+                        <p class="text-sm">Customize your preferences</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -33,7 +62,7 @@
 <!-- Our Cottages Section -->
 <div class="py-16 bg-gray-100">
     <div class="max-w-6xl mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 text-center">Our Cottages</h2>
+        <h2 class="text-3xl font-bold mb-8 text-center">Luxury Riverfront Retreats</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {% if featured_cottages %}
@@ -45,24 +74,50 @@
                         <h3 class="text-xl font-bold mb-2">{{ cottage.flag_color }} Flag Cottage {{ cottage.cottage_no }} </h3>
                         <p class="text-gray-600 mb-4">{{ cottage.cottage_description or "Comfortable cottage with beautiful views." }}</p>
                         <p class="text-gray-600 mb-4">Max capacity: {{ cottage.max_persons }} persons</p>
-                       
-                        <div class="flex justify-between items-center">
-                            <button onclick="window.location.href='/owner/edit-cottage/{{ cottage.id }}'" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md transition duration-300">Edit</button>
-                            <button onclick="window.location.href='/owner/cottage-bookings/{{ cottage.id }}'" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-300">View Bookings</button>
-                        </div>
                     </div>
                 </div>
                 {% endfor %}
             {% else %}
                 <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=1470&h=780" alt="Blue Flag Cottage" class="w-full h-48 object-cover">
+                    <img src="{{ url_for('static', filename='uploads/1st.jpg') }}" alt="Default Cottage" class="w-full h-48 object-cover">
                     <div class="p-6">
-                        <h3 class="text-xl font-bold mb-2">Blue Flag Cottages</h3>
-                        <p class="text-gray-600 mb-4">Perfect for couples or small families. Enjoy beautiful ocean views.</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-lg font-bold">₱2,500</span>
-                            <button onclick="window.location.href='/owner/dashboard'" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-300">Manage</button>
-                        </div>
+                        <h3 class="text-xl font-bold mb-2">Blue Flag Cottage</h3>
+                        <p class="text-gray-600 mb-4">Perfect for couples or small families. Enjoy beautiful river views.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{{ url_for('static', filename='uploads/2nd.jpg') }}" alt="Default Cottage" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Red Flag Cottage</h3>
+                        <p class="text-gray-600 mb-4">Spacious cottage ideal for large families and group gatherings.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{{ url_for('static', filename='uploads/2.png') }}" alt="Default Cottage" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Green Flag Cottage</h3>
+                        <p class="text-gray-600 mb-4">Eco-friendly cottage with modern amenities and scenic views.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{{ url_for('static', filename='uploads/17.jpg') }}" alt="Default Cottage" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Yellow Flag Cottage</h3>
+                        <p class="text-gray-600 mb-4">Cozy retreat perfect for romantic getaways and weekend escapes.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{{ url_for('static', filename='uploads/18.jpg') }}" alt="Default Cottage" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">White Flag Cottage</h3>
+                        <p class="text-gray-600 mb-4">Luxury cottage with premium amenities and panoramic river views.</p>
+                    </div>
+                </div>
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <img src="{{ url_for('static', filename='uploads/15.jpg') }}" alt="Default Cottage" class="w-full h-48 object-cover">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">Black Flag Cottage</h3>
+                        <p class="text-gray-600 mb-4">Exclusive cottage with private access and premium features.</p>
                     </div>
                 </div>
             {% endif %}
@@ -76,14 +131,17 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {% set experience_images = [
-                {'src': 'https://images.unsplash.com/photo-1590725121839-892b458a74fe?q=80&w=1470&h=780', 'alt': 'Cottage View'},
-                {'src': 'https://images.unsplash.com/photo-1510798831971-661eb04b3739?q=80&w=1470&h=780', 'alt': 'Cottage Exterior'},
-                {'src': 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=1470&h=780', 'alt': 'Cottage Interior'},
-                {'src': 'https://images.unsplash.com/photo-1464288550599-043d5a73451b?q=80&w=1470&h=780', 'alt': 'Beach View'},
-                {'src': 'https://images.unsplash.com/photo-1482192505345-5655af888cc4?q=80&w=1470&h=780', 'alt': 'Dining Area'},
-                {'src': 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=1470&h=780', 'alt': 'Bedroom'},
-                {'src': 'https://images.unsplash.com/photo-1576013551627-0cc20b96c2a7?q=80&w=1470&h=780', 'alt': 'Garden View'},
-                {'src': 'https://images.unsplash.com/photo-1560185007-cde436f6a4d0?q=80&w=1470&h=780', 'alt': 'Sunset View'}
+                {'src': 'static/uploads/1st.jpg', 'alt': 'Cottage 1'},
+                {'src': 'static/uploads/2nd.jpg', 'alt': 'Cottage 2'},
+                {'src': 'static/uploads/3.png', 'alt': 'Cottage 5'},
+                {'src': 'static/uploads/5.png', 'alt': 'Cottage 6'},
+                {'src': 'static/uploads/15.jpg', 'alt': 'Cottage 7'},
+                {'src': 'static/uploads/20.jpg', 'alt': 'Cottage 8'},
+                {'src': 'static/uploads/17.jpg', 'alt': 'Cottage 9'},
+                {'src': 'static/uploads/18.jpg', 'alt': 'Cottage 10'}
+                
+                
+                
             ] %}
             {% for image in experience_images %}
             <div class="overflow-hidden rounded-lg shadow-md hover:shadow-xl transition duration-300">
@@ -106,76 +164,22 @@
                 <p class="text-gray-600 mb-4">
                     Each cottage is designed to offer comfort, privacy, and stunning views of the surrounding landscape. Whether you're looking for a romantic getaway, a family vacation, or a solo adventure, we have the perfect accommodation for you.
                 </p>
-                <button onclick="window.location.href='/contact'" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">
-                    Contact Us
-                </button>
+                <div class="flex flex-col gap-4">
+                    <a href="tel:+639123456789" class="text-blue-600 text-2xl font-bold hover:text-blue-700 transition-colors duration-300 flex items-center gap-2">
+                        <i class="fas fa-phone"></i>
+                        09123456789
+                    </a>
+                </div>
             </div>
             <div>
-                <img src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1480&h=780" alt="River View" class="rounded-lg shadow-md w-full h-auto">
+                <img src="static/uploads/3.png" alt="River View" class="rounded-lg shadow-md w-full h-auto">
             </div>
         </div>
     </div>
 </div>
 
 <!-- Testimonials Section -->
-<div class="py-16 bg-white">
-    <div class="max-w-6xl mx-auto px-4">
-        <h2 class="text-3xl font-bold mb-8 text-center">What Our Guests Say</h2>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-gray-100 p-6 rounded-lg shadow">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-blue-200 flex items-center justify-center text-blue-600 font-bold text-xl">
-                        M
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="font-bold">Maria Santos</h4>
-                        <div class="flex text-yellow-400">
-                            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-gray-600">
-                    "Our stay at the Norzagaray River Cottage was perfect. The cottage was clean and comfortable, and the view of the river was breathtaking."
-                </p>
-            </div>
-            
-            <div class="bg-gray-100 p-6 rounded-lg shadow">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-green-200 flex items-center justify-center text-green-600 font-bold text-xl">
-                        J
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="font-bold">Juan Reyes</h4>
-                        <div class="flex text-yellow-400">
-                            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-gray-600">
-                    "The cottages are well-maintained and the staff was very accommodating. It's the perfect weekend getaway for our family."
-                </p>
-            </div>
-            
-            <div class="bg-gray-100 p-6 rounded-lg shadow">
-                <div class="flex items-center mb-4">
-                    <div class="w-12 h-12 rounded-full bg-purple-200 flex items-center justify-center text-purple-600 font-bold text-xl">
-                        A
-                    </div>
-                    <div class="ml-4">
-                        <h4 class="font-bold">Ana Lim</h4>
-                        <div class="flex text-yellow-400">
-                            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                        </div>
-                    </div>
-                </div>
-                <p class="text-gray-600">
-                    "A hidden gem! The cottages are beautiful and the river is so refreshing. We'll definitely be back soon!"
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <!-- Contact/Footer Section -->
 <footer class="bg-gray-800 text-white py-12">
@@ -185,29 +189,23 @@
                 <h3 class="text-2xl font-bold mb-4">Norzagaray River Cottage</h3>
                 <p class="mb-4">Experience the beauty of nature with our comfortable cottages along the Norzagaray River.</p>
                 <div class="flex space-x-4">
-                    <a href="#" class="text-white hover:text-blue-400"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-white hover:text-blue-400"><i class="fab fa-instagram"></i></a>
-                    <a href="#" class="text-white hover:text-blue-400"><i class="fab fa-twitter"></i></a>
+                    <a href="https://www.facebook.com" target="_blank" class="text-white hover:text-blue-400 transition-colors duration-300"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com" target="_blank" class="text-white hover:text-blue-400 transition-colors duration-300"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.twitter.com" target="_blank" class="text-white hover:text-blue-400 transition-colors duration-300"><i class="fab fa-twitter"></i></a>
                 </div>
             </div>
             
             <div>
                 <h3 class="text-xl font-bold mb-4">Contact Us</h3>
                 <p class="mb-2"><i class="fas fa-map-marker-alt mr-2"></i> Norzagaray, Bulacan, Philippines</p>
-                <p class="mb-2"><i class="fas fa-phone mr-2"></i> +63 912 345 6789</p>
+                <p class="mb-2">
+                    <i class="fas fa-phone mr-2"></i> 
+                    <a href="tel:+639123456789" class="hover:text-blue-400 transition-colors duration-300">09123456789</a>
+                </p>
                 <p class="mb-2"><i class="fas fa-envelope mr-2"></i> info@norzagaraycottage.com</p>
             </div>
             
-            <div>
-                <h3 class="text-xl font-bold mb-4">Quick Links</h3>
-                <ul>
-                    <li class="mb-2"><a href="/" class="hover:text-blue-400">Home</a></li>
-                    <li class="mb-2"><a href="/cottages" class="hover:text-blue-400">Cottages</a></li>
-                    <li class="mb-2"><a href="/booking" class="hover:text-blue-400">Book Now</a></li>
-                    <li class="mb-2"><a href="/contact" class="hover:text-blue-400">Contact</a></li>
-                    <li class="mb-2"><a href="/owner/login" class="hover:text-blue-400">Owner Login</a></li>
-                </ul>
-            </div>
+
         </div>
         
         <div class="border-t border-gray-700 mt-8 pt-8 text-center">
